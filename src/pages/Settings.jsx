@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useAuth } from '../contexts/AuthContext'
-import { User, Bell, Lock, ChevronLeft, Save, Share2, Phone, Clock, Plus, X } from 'lucide-react'
+import { User, Bell, Lock, ChevronLeft, Save, Share2, Phone, Clock, Plus, X, Calendar, Mail, CheckCircle, AlertCircle } from 'lucide-react'
 import api from '../lib/api'
+import { useSearchParams } from 'react-router-dom'
 
 const DAY_LABELS = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת']
 
@@ -153,10 +154,161 @@ function AvailabilityTab() {
   )
 }
 
+function IntegrationsTab() {
+  const [status, setStatus] = useState(null)
+  const [loading, setLoading] = useState(false)
+  const [searchParams] = useSearchParams()
+
+  useEffect(() => {
+    api.get('/integrations/status').then(r => setStatus(r.data)).catch(() => {})
+  }, [])
+
+  const googleResult = searchParams.get('google')
+
+  const connectGoogle = async () => {
+    setLoading(true)
+    try {
+      const { data } = await api.get('/integrations/google/connect')
+      window.location.href = data.url
+    } catch {
+      setLoading(false)
+    }
+  }
+
+  const disconnectGoogle = async () => {
+    await api.delete('/integrations/google/disconnect')
+    setStatus(s => ({ ...s, googleCalendar: { ...s.googleCalendar, connected: false, enabled: false } }))
+  }
+
+  const toggleGoogle = async () => {
+    const { data } = await api.put('/integrations/google/toggle')
+    setStatus(s => ({ ...s, googleCalendar: { ...s.googleCalendar, enabled: data.enabled } }))
+  }
+
+  const toggleEmail = async () => {
+    const { data } = await api.put('/integrations/email/toggle')
+    setStatus(s => ({ ...s, email: { ...s.email, enabled: data.enabled } }))
+  }
+
+  if (!status) return (
+    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-12 flex items-center justify-center">
+      <div className="w-8 h-8 border-2 border-[#00969E]/20 border-t-[#00969E] rounded-full animate-spin" />
+    </div>
+  )
+
+  return (
+    <div className="space-y-4">
+      {/* Google result banner */}
+      {googleResult === 'connected' && (
+        <div className="flex items-center gap-2 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl text-sm font-medium">
+          <CheckCircle size={16} /> Google Calendar חובר בהצלחה!
+        </div>
+      )}
+      {googleResult === 'error' && (
+        <div className="flex items-center gap-2 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm font-medium">
+          <AlertCircle size={16} /> חיבור Google Calendar נכשל — נסה שוב
+        </div>
+      )}
+
+      {/* Google Calendar */}
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+            <Calendar size={20} />
+          </div>
+          <div>
+            <h3 className="font-semibold text-gray-900">Google Calendar</h3>
+            <p className="text-xs text-gray-400">סנכרן אימונים אוטומטית ליומן שלך</p>
+          </div>
+          <div className="mr-auto">
+            {status.googleCalendar.connected ? (
+              <span className="flex items-center gap-1.5 text-xs font-semibold text-green-600 bg-green-50 px-3 py-1.5 rounded-full">
+                <CheckCircle size={12} /> מחובר
+              </span>
+            ) : (
+              <span className="text-xs text-gray-400 bg-gray-50 px-3 py-1.5 rounded-full">לא מחובר</span>
+            )}
+          </div>
+        </div>
+
+        {!status.googleCalendar.configured && (
+          <p className="text-xs text-amber-600 bg-amber-50 px-3 py-2 rounded-lg mb-3">
+            ⚠️ Google Calendar לא מוגדר בשרת — הוסף GOOGLE_CLIENT_ID ו-GOOGLE_CLIENT_SECRET
+          </p>
+        )}
+
+        {status.googleCalendar.connected ? (
+          <div className="flex items-center gap-3">
+            <button onClick={toggleGoogle}
+              className={`relative w-11 h-6 rounded-full transition-colors flex-shrink-0 ${status.googleCalendar.enabled ? 'bg-[#00969E]' : 'bg-gray-200'}`}>
+              <span className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform"
+                style={{ transform: status.googleCalendar.enabled ? 'translateX(20px)' : 'translateX(0)' }} />
+            </button>
+            <span className="text-sm text-gray-600">הוספה אוטומטית של אימונים ליומן</span>
+            <button onClick={disconnectGoogle} className="mr-auto text-xs text-red-500 hover:text-red-700 underline">
+              נתק
+            </button>
+          </div>
+        ) : (
+          <button onClick={connectGoogle} disabled={loading || !status.googleCalendar.configured}
+            className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-semibold transition-all disabled:opacity-50">
+            <Calendar size={15} />
+            {loading ? 'מחבר...' : 'חבר Google Calendar'}
+          </button>
+        )}
+      </div>
+
+      {/* Email notifications */}
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 rounded-xl bg-[#E6F7F8] text-[#00969E] flex items-center justify-center">
+            <Mail size={20} />
+          </div>
+          <div>
+            <h3 className="font-semibold text-gray-900">התראות אימייל</h3>
+            <p className="text-xs text-gray-400">שלח מיילים אוטומטיים ללקוחות</p>
+          </div>
+        </div>
+
+        {!status.email.configured && (
+          <p className="text-xs text-amber-600 bg-amber-50 px-3 py-2 rounded-lg mb-3">
+            ⚠️ SendGrid לא מוגדר — הוסף SENDGRID_API_KEY בשרת
+          </p>
+        )}
+
+        <div className="space-y-3">
+          {[
+            { label: 'אישור קביעת אימון', desc: 'לקוח מקבל מייל כשנקבע אימון' },
+            { label: 'ביטול אימון',       desc: 'לקוח מקבל מייל כשאימון מבוטל' },
+            { label: 'תזכורת 24 שעות',   desc: 'תזכורת אוטומטית יום לפני האימון' },
+          ].map((item, i) => (
+            <div key={i} className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
+              <div>
+                <p className="text-sm font-medium text-gray-800">{item.label}</p>
+                <p className="text-xs text-gray-400">{item.desc}</p>
+              </div>
+              <button onClick={i === 0 ? toggleEmail : undefined}
+                className={`relative w-11 h-6 rounded-full transition-colors flex-shrink-0 ${status.email.enabled ? 'bg-[#00969E]' : 'bg-gray-200'}`}>
+                <span className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform"
+                  style={{ transform: status.email.enabled ? 'translateX(20px)' : 'translateX(0)' }} />
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function Settings() {
   const { user } = useAuth()
   const [tab, setTab] = useState('profile')
   const [saved, setSaved] = useState(false)
+  const [searchParams] = useSearchParams()
+
+  useEffect(() => {
+    if (searchParams.get('google')) setTab('integrations')
+  }, [searchParams])
   const { register, handleSubmit, formState: { isSubmitting } } = useForm({
     defaultValues: { businessName: user?.businessName, email: user?.email, phone: user?.phone }
   })
@@ -168,10 +320,11 @@ export default function Settings() {
   }
 
   const tabs = [
-    { id: 'profile',      label: 'פרופיל',  icon: User  },
-    { id: 'availability', label: 'זמינות',  icon: Clock },
-    { id: 'notifications',label: 'התראות',  icon: Bell  },
-    { id: 'security',     label: 'אבטחה',   icon: Lock  },
+    { id: 'profile',      label: 'פרופיל',     icon: User     },
+    { id: 'availability', label: 'זמינות',     icon: Clock    },
+    { id: 'notifications',label: 'התראות',     icon: Bell     },
+    { id: 'integrations', label: 'אינטגרציות', icon: Calendar },
+    { id: 'security',     label: 'אבטחה',      icon: Lock     },
   ]
 
   const notifications = [
@@ -225,7 +378,8 @@ export default function Settings() {
         </div>
       )}
 
-      {tab === 'availability' && <AvailabilityTab />}
+      {tab === 'availability'  && <AvailabilityTab />}
+      {tab === 'integrations'  && <IntegrationsTab />}
 
       {tab === 'notifications' && (
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
