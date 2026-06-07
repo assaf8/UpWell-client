@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate, useParams, Link } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { ArrowRight, User, Phone, Mail, Calendar, Target, AlertCircle } from 'lucide-react'
@@ -9,12 +9,26 @@ export default function ClientForm() {
   const navigate = useNavigate()
   const isEdit = Boolean(id) && id !== 'new'
   const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm()
+  const [dob, setDob] = useState({ day: '', month: '', year: '' })
 
   useEffect(() => {
-    if (isEdit) api.get(`/clients/${id}`).then(r => reset(r.data)).catch(() => navigate('/clients'))
+    if (isEdit) api.get(`/clients/${id}`).then(r => {
+      reset(r.data)
+      if (r.data.dateOfBirth) {
+        const d = new Date(r.data.dateOfBirth)
+        setDob({ day: String(d.getUTCDate()), month: String(d.getUTCMonth() + 1), year: String(d.getUTCFullYear()) })
+      }
+    }).catch(() => navigate('/clients'))
   }, [id])
 
   const onSubmit = async (data) => {
+    // Build dateOfBirth from day/month/year
+    if (dob.day && dob.month && dob.year) {
+      const dd = dob.day.padStart(2,'0'), mm = dob.month.padStart(2,'0')
+      data.dateOfBirth = `${dob.year}-${mm}-${dd}`
+    } else {
+      data.dateOfBirth = ''
+    }
     if (isEdit) await api.put(`/clients/${id}`, data)
     else await api.post('/clients', data)
     navigate('/clients')
@@ -57,8 +71,23 @@ export default function ClientForm() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-1.5"><Calendar size={13} /> תאריך לידה</label>
-                <input {...register('dateOfBirth')} type="date" dir="ltr"
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#00969E]/20 focus:border-[#00969E] focus:bg-white transition-all" />
+                <div className="flex gap-2" dir="ltr">
+                  <select value={dob.day} onChange={e => setDob(d => ({...d, day: e.target.value}))}
+                    className="flex-1 px-3 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#00969E]/20 focus:border-[#00969E] focus:bg-white transition-all">
+                    <option value="">DD</option>
+                    {Array.from({length:31},(_,i)=>i+1).map(d=><option key={d} value={d}>{String(d).padStart(2,'0')}</option>)}
+                  </select>
+                  <select value={dob.month} onChange={e => setDob(d => ({...d, month: e.target.value}))}
+                    className="flex-1 px-3 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#00969E]/20 focus:border-[#00969E] focus:bg-white transition-all">
+                    <option value="">MM</option>
+                    {['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'].map((m,i)=><option key={i+1} value={i+1}>{String(i+1).padStart(2,'0')} - {m}</option>)}
+                  </select>
+                  <select value={dob.year} onChange={e => setDob(d => ({...d, year: e.target.value}))}
+                    className="flex-1 px-3 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#00969E]/20 focus:border-[#00969E] focus:bg-white transition-all">
+                    <option value="">YYYY</option>
+                    {Array.from({length:80},(_,i)=>new Date().getFullYear()-i).map(y=><option key={y} value={y}>{y}</option>)}
+                  </select>
+                </div>
               </div>
             </div>
 
