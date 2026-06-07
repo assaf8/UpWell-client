@@ -81,14 +81,14 @@ export default function Landing() {
         <div className="relative max-w-4xl mx-auto px-6 py-24 text-center">
           <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur px-4 py-1.5 rounded-full text-sm font-medium mb-6">
             <Zap size={14} className="text-yellow-300" />
-            פלטפורמה מספר 1 למקצועות הבריאות והוולנס
+            פלטפורמה מספר 1 לאנשי וולנס בישראל
           </div>
           <h1 className="text-5xl md:text-6xl font-black leading-tight mb-6">
             UpWell.<br />
             <span className="text-white/80">לצמוח יחד.</span>
           </h1>
           <p className="text-xl text-white/80 max-w-2xl mx-auto leading-relaxed mb-10">
-            לקוחות, תוכניות, חשבוניות, סרטונים — הכל בפלטפורמה אחת.
+            לקוחות, תוכניות, חשבוניות, סרטונים — הכל בפלטפורמה אחת!
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link to="/signup"
@@ -118,7 +118,7 @@ export default function Landing() {
       {/* Features */}
       <section className="max-w-6xl mx-auto px-6 py-20">
         <div className="text-center mb-14">
-          <h2 className="text-3xl font-black text-gray-900 mb-3">כל מה שצריך כדי לצמוח את העסק שלך</h2>
+          <h2 className="text-3xl font-black text-gray-900 mb-3">כל מה שצריך כדי להצמיח את העסק שלך קדימה</h2>
           <p className="text-gray-500 text-lg">תוכנה שמבינה את עסק הבריאות והוולנס שלך</p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
