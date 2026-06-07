@@ -182,31 +182,6 @@ export default function Login() {
             </Link>
           </p>
 
-          {/* Demo shortcut */}
-          <section className="mt-6 p-4 bg-amber-50 border border-amber-100 rounded-xl" aria-label="כניסת דמו">
-            <p className="text-xs font-bold text-amber-700 mb-2 text-center">🎯 כניסת דמו מהירה</p>
-            <div className="grid grid-cols-2 gap-2">
-              <button type="button"
-                onClick={() => directLogin('demo@upwell.com', 'demo123')}
-                disabled={!!demoLoading}
-                className="py-2.5 bg-amber-100 hover:bg-amber-200 text-amber-800 rounded-lg text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 disabled:opacity-60"
-                aria-label="כניסה כמאמן דמו">
-                {demoLoading === 'demo@upwell.com'
-                  ? <span className="flex items-center justify-center gap-1"><span className="w-3 h-3 border border-amber-600/40 border-t-amber-700 rounded-full animate-spin" />מתחבר...</span>
-                  : '👩‍💼 מאמן'}
-              </button>
-              <button type="button"
-                onClick={() => directLogin('sarah@example.com', 'trainee123')}
-                disabled={!!demoLoading}
-                className="py-2.5 bg-amber-100 hover:bg-amber-200 text-amber-800 rounded-lg text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 disabled:opacity-60"
-                aria-label="כניסה כמתאמן דמו">
-                {demoLoading === 'sarah@example.com'
-                  ? <span className="flex items-center justify-center gap-1"><span className="w-3 h-3 border border-amber-600/40 border-t-amber-700 rounded-full animate-spin" />מתחבר...</span>
-                  : '🏃 מתאמן (שרה)'}
-              </button>
-            </div>
-            <p className="text-center text-xs text-amber-600 mt-2">לחיצה אחת — כניסה מיידית</p>
-          </section>
 
           {/* Legal links */}
           <nav className="mt-6 flex flex-wrap justify-center gap-3 text-xs text-gray-400" aria-label="דפים משפטיים">
