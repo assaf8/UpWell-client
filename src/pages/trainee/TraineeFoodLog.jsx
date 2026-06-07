@@ -40,7 +40,7 @@ function AiAnalysisPanel({ log, onUpdated }) {
     } finally { setLoading(false) }
   }
 
-  if (log.aiAnalysis) {
+  if (log.aiAnalysis?.totalCalories) {
     const a = log.aiAnalysis
     return (
       <div className="mt-3 space-y-2">
