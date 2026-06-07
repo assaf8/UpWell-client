@@ -141,7 +141,7 @@ export default function TraineeChat() {
           const m  = g.data
           const isMe = m.sender === 'trainee'
           return (
-            <div key={m._id} className={`flex ${isMe ? 'justify-start' : 'justify-end'}`}>
+            <div key={m._id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
               <div className={`max-w-[78%] rounded-2xl px-3.5 py-2.5 shadow-sm ${
                 isMe
                   ? 'bg-[#00969E] text-white rounded-br-sm'
