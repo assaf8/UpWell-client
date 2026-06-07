@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { ArrowLeft, Edit, Phone, Mail, Target, AlertCircle, Plus, Dumbbell, TrendingUp, UserCheck, X, Eye, EyeOff, CheckCircle } from 'lucide-react'
+import { ArrowLeft, Edit, Phone, Mail, Target, AlertCircle, Plus, Dumbbell, TrendingUp, UserCheck, X, Eye, EyeOff, CheckCircle, MessageCircle, Camera, Send, Flame, Wheat, Droplets } from 'lucide-react'
 import api from '../lib/api'
+import { getMediaUrl } from '../lib/media'
 
 function InviteModal({ client, onClose }) {
   const [email, setEmail] = useState(client.email || '')
@@ -100,11 +101,104 @@ function InviteModal({ client, onClose }) {
   )
 }
 
+function ChatTab({ clientId }) {
+  const [messages, setMessages] = useState([])
+  const [text, setText] = useState('')
+  const [sending, setSending] = useState(false)
+
+  useEffect(() => {
+    api.get(`/inbox/chat/${clientId}`).then(r => setMessages(r.data || [])).catch(() => {})
+  }, [clientId])
+
+  const send = async () => {
+    if (!text.trim()) return
+    setSending(true)
+    try {
+      const { data } = await api.post(`/inbox/chat/${clientId}`, { text })
+      setMessages(m => [...m, data])
+      setText('')
+    } catch {} finally { setSending(false) }
+  }
+
+  return (
+    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm flex flex-col h-96">
+      <div className="px-5 py-3 border-b border-gray-50 font-semibold text-gray-900 text-sm flex items-center gap-2">
+        <MessageCircle size={15} className="text-[#00969E]" /> צ׳אט עם לקוח
+      </div>
+      <div className="flex-1 overflow-y-auto p-4 space-y-2">
+        {messages.length === 0 && <p className="text-center text-xs text-gray-400 mt-8">אין הודעות עדיין</p>}
+        {messages.map((m, i) => (
+          <div key={i} className={`flex ${m.sender === 'trainer' ? 'justify-start' : 'justify-end'}`}>
+            <div className={`max-w-xs px-3 py-2 rounded-2xl text-sm ${m.sender === 'trainer' ? 'bg-[#E6F7F8] text-gray-800' : 'bg-gray-100 text-gray-800'}`}>
+              {m.text}
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="p-3 border-t border-gray-50 flex gap-2">
+        <input value={text} onChange={e => setText(e.target.value)} onKeyDown={e => e.key === 'Enter' && send()}
+          placeholder="כתוב הודעה..." dir="rtl"
+          className="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#00969E]/20 focus:border-[#00969E]" />
+        <button onClick={send} disabled={sending || !text.trim()}
+          className="px-4 py-2 bg-[#00969E] hover:bg-[#007A81] text-white rounded-xl text-sm font-semibold disabled:opacity-50 transition-all">
+          <Send size={14} />
+        </button>
+      </div>
+    </div>
+  )
+}
+
+function FoodDiaryTab({ clientId }) {
+  const [logs, setLogs] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    api.get(`/inbox/food-log/${clientId}`).then(r => setLogs(r.data || [])).catch(() => {}).finally(() => setLoading(false))
+  }, [clientId])
+
+  if (loading) return <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-12 flex items-center justify-center"><div className="w-8 h-8 border-2 border-[#00969E]/20 border-t-[#00969E] rounded-full animate-spin" /></div>
+
+  return (
+    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm">
+      <div className="px-5 py-3 border-b border-gray-50 font-semibold text-gray-900 text-sm flex items-center gap-2">
+        <Camera size={15} className="text-[#00969E]" /> יומן אוכל
+      </div>
+      {logs.length === 0 ? (
+        <div className="py-12 text-center"><Camera size={28} className="mx-auto text-gray-300 mb-2" /><p className="text-sm text-gray-400">אין רשומות עדיין</p></div>
+      ) : (
+        <div className="divide-y divide-gray-50">
+          {logs.map(log => (
+            <div key={log._id} className="p-4 flex gap-3">
+              {log.imageUrl && <img src={getMediaUrl(log.imageUrl)} alt="" className="w-16 h-16 rounded-xl object-cover flex-shrink-0" />}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between mb-1">
+                  <p className="text-sm font-semibold text-gray-900">{log.caption || 'ארוחה'}</p>
+                  <p className="text-xs text-gray-400">{new Date(log.createdAt).toLocaleDateString('he-IL')}</p>
+                </div>
+                {log.aiAnalysis?.totalCalories && (
+                  <div className="flex items-center gap-3 text-xs text-gray-500">
+                    <span className="flex items-center gap-1 text-orange-600"><Flame size={11} />{log.aiAnalysis.totalCalories} קל׳</span>
+                    <span className="flex items-center gap-1 text-blue-600">{log.aiAnalysis.totalProtein}g חלבון</span>
+                    <span className="flex items-center gap-1 text-yellow-600"><Wheat size={11} />{log.aiAnalysis.totalCarbs}g פחמימות</span>
+                    <span className="flex items-center gap-1 text-pink-600"><Droplets size={11} />{log.aiAnalysis.totalFat}g שומן</span>
+                  </div>
+                )}
+                {log.aiAnalysis?.notes && <p className="text-xs text-gray-400 mt-1">{log.aiAnalysis.notes}</p>}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function ClientDetail() {
   const { id } = useParams()
   const [client, setClient] = useState(null)
   const [programs, setPrograms] = useState([])
   const [showInvite, setShowInvite] = useState(false)
+  const [tab, setTab] = useState('overview')
 
   useEffect(() => {
     api.get(`/clients/${id}`).then(r => setClient(r.data)).catch(() => {})
@@ -152,7 +246,19 @@ export default function ClientDetail() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      {/* Tabs */}
+      <div className="flex gap-1 bg-white border border-gray-100 rounded-2xl p-1.5 shadow-sm mb-4 w-fit">
+        {[{id:'overview',label:'סקירה'},{id:'chat',label:'💬 צ׳אט'},{id:'food',label:'🍽️ יומן אוכל'}].map(t => (
+          <button key={t.id} onClick={() => setTab(t.id)}
+            className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${tab === t.id ? 'bg-[#00969E] text-white shadow-md' : 'text-gray-500 hover:text-gray-800'}`}>
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      {tab === 'chat' && <ChatTab clientId={id} />}
+      {tab === 'food' && <FoodDiaryTab clientId={id} />}
+      {tab === 'overview' && <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Profile */}
         <div className="space-y-4">
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 text-center">
@@ -259,7 +365,7 @@ export default function ClientDetail() {
             )}
           </div>
         </div>
-      </div>
+      </div>}
     </div>
   )
 }
