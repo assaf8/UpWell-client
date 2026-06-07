@@ -61,7 +61,7 @@ export default function Signup() {
 
         <div className="relative z-10">
           <h1 className="text-4xl font-bold text-white leading-tight mb-6">
-            כל מה שצריך<br />כדי לצמוח<br />את העסק שלך.
+            כל מה שצריך<br />כדי להצמיח<br />את העסק שלך קדימה.
           </h1>
           <ul className="space-y-3" aria-label="יתרונות המערכת">
             {perks.map(p => (
