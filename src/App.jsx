@@ -52,6 +52,7 @@ function PublicRoute({ children }) {
 
 export default function App() {
   return (
+    <>
     <BrowserRouter>
       <AuthProvider>
         <SocketProvider>
@@ -100,5 +101,6 @@ export default function App() {
       </AuthProvider>
     </BrowserRouter>
     <Analytics />
+    </>
   )
 }
