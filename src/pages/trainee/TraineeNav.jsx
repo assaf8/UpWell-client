@@ -36,12 +36,10 @@ export default function TraineeNav({ unread = 0, hasDiet = false }) {
           <span>התקדמות</span>
         </NavLink>
 
-        {hasDiet && (
-          <NavLink to="/trainee/food-log" className={({ isActive }) => `${base} ${isActive ? active : inactive}`}>
-            <Camera size={20} />
-            <span>יומן אוכל</span>
-          </NavLink>
-        )}
+        <NavLink to="/trainee/food-log" className={({ isActive }) => `${base} ${isActive ? active : inactive}`}>
+          <Camera size={20} />
+          <span>יומן אוכל</span>
+        </NavLink>
       </div>
     </nav>
   )
