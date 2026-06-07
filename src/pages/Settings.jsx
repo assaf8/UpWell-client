@@ -73,18 +73,18 @@ function AvailabilityTab() {
           {[0,1,2,3,4,5,6].map(idx => {
             const day = avail.days?.[idx] || { enabled: false, start: '09:00', end: '18:00' }
             return (
-              <div key={idx} className={`flex items-center gap-3 p-3 rounded-xl transition-colors ${day.enabled ? 'bg-[#E6F7F8]/50' : 'bg-gray-50'}`}>
+              <div key={idx} className={`flex items-center gap-2 p-2 rounded-xl transition-colors ${day.enabled ? 'bg-[#E6F7F8]/50' : 'bg-gray-50'}`}>
                 <Toggle checked={!!day.enabled} onChange={v => updateDay(idx, 'enabled', v)} />
-                <span className={`w-16 text-sm font-semibold flex-shrink-0 ${day.enabled ? 'text-gray-900' : 'text-gray-400'}`}>
+                <span className={`w-12 text-xs font-semibold flex-shrink-0 ${day.enabled ? 'text-gray-900' : 'text-gray-400'}`}>
                   {DAY_LABELS[idx]}
                 </span>
                 {day.enabled ? (
-                  <div className="flex items-center gap-2 flex-1">
+                  <div className="flex items-center gap-1 flex-1 min-w-0">
                     <input type="time" value={day.start} onChange={e => updateDay(idx, 'start', e.target.value)} dir="ltr"
-                      className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00969E]/20 focus:border-[#00969E] w-28" />
-                    <span className="text-gray-400 text-sm">—</span>
+                      className="px-1.5 py-1.5 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-[#00969E]/20 focus:border-[#00969E] flex-1 min-w-0" />
+                    <span className="text-gray-400 text-xs flex-shrink-0">—</span>
                     <input type="time" value={day.end} onChange={e => updateDay(idx, 'end', e.target.value)} dir="ltr"
-                      className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00969E]/20 focus:border-[#00969E] w-28" />
+                      className="px-1.5 py-1.5 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-[#00969E]/20 focus:border-[#00969E] flex-1 min-w-0" />
                   </div>
                 ) : (
                   <span className="text-xs text-gray-400 flex-1">לא זמין</span>
