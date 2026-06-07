@@ -256,8 +256,8 @@ export default function ClientDetail() {
         ))}
       </div>
 
-      {tab === 'chat' && <ChatTab clientId={id} />}
-      {tab === 'food' && <FoodDiaryTab clientId={id} />}
+      <div style={{display: tab === 'chat' ? 'block' : 'none'}}><ChatTab clientId={id} /></div>
+      <div style={{display: tab === 'food' ? 'block' : 'none'}}><FoodDiaryTab clientId={id} /></div>
       {tab === 'overview' && <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Profile */}
         <div className="space-y-4">
