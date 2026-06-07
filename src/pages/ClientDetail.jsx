@@ -128,8 +128,8 @@ function ChatTab({ clientId }) {
       <div className="flex-1 overflow-y-auto p-4 space-y-2">
         {messages.length === 0 && <p className="text-center text-xs text-gray-400 mt-8">אין הודעות עדיין</p>}
         {messages.map((m, i) => (
-          <div key={i} className={`flex ${m.sender === 'trainer' ? 'justify-start' : 'justify-end'}`}>
-            <div className={`max-w-xs px-3 py-2 rounded-2xl text-sm ${m.sender === 'trainer' ? 'bg-[#E6F7F8] text-gray-800' : 'bg-gray-100 text-gray-800'}`}>
+          <div key={i} className={`flex ${m.sender === 'trainer' ? 'justify-end' : 'justify-start'}`}>
+            <div className={`max-w-xs px-3 py-2 rounded-2xl text-sm ${m.sender === 'trainer' ? 'bg-[#00969E] text-white' : 'bg-gray-100 text-gray-800'}`}>
               {m.text}
             </div>
           </div>
