@@ -30,6 +30,7 @@ import TraineeChat from './pages/trainee/TraineeChat'
 import TraineeFoodLog from './pages/trainee/TraineeFoodLog'
 import TraineeProgress from './pages/trainee/TraineeProgress'
 import Admin from './pages/Admin'
+import Billing from './pages/Billing'
 
 function PrivateRoute({ children }) {
   const { user } = useAuth()
@@ -105,6 +106,10 @@ export default function App() {
             <Route path="/trainee/chat"          element={<TraineeRoute><TraineeChat /></TraineeRoute>} />
             <Route path="/trainee/food-log"      element={<TraineeRoute><TraineeFoodLog /></TraineeRoute>} />
             <Route path="/trainee/progress"      element={<TraineeRoute><TraineeProgress /></TraineeRoute>} />
+
+            {/* Billing */}
+            <Route path="/billing" element={<PrivateRoute><Billing /></PrivateRoute>} />
+            <Route path="/billing/callback" element={<PrivateRoute><Billing /></PrivateRoute>} />
 
             {/* Admin */}
             <Route path="/admin" element={<AdminRoute><Admin /></AdminRoute>} />
