@@ -26,8 +26,10 @@ export default function Login() {
   const onSubmit = async (data) => {
     setError('')
     try {
-      await login(data.email, data.password)
-      navigate('/dashboard')
+      const result = await login(data.email, data.password)
+      if (result.user.role === 'admin') navigate('/admin')
+      else if (result.user.role === 'trainee') navigate('/trainee')
+      else navigate('/dashboard')
     } catch (e) {
       setError(e.response?.data?.message || 'אימייל או סיסמה שגויים.')
     }
