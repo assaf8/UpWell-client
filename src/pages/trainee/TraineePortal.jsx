@@ -34,6 +34,7 @@ export default function TraineePortal() {
 
   const activePrograms = data?.programs?.filter(p => p.status === 'active') || []
   const hasDiet = data?.programs?.some(p => p.program?.type === 'diet') || false
+  const upcomingSessions = data?.nextSession ? [data.nextSession] : []
   const totalProgress = activePrograms.length > 0
     ? Math.round(activePrograms.reduce((s, p) => s + (p.progressPercentage || 0), 0) / activePrograms.length)
     : 0
@@ -121,21 +122,22 @@ export default function TraineePortal() {
 
             {data?.nextSession && (
               <Link to="/trainee/book"
-                className="flex items-center gap-3 bg-white rounded-2xl shadow-lg px-4 py-3 border-r-4 border-green-500 hover:shadow-xl transition-shadow">
-                <div className="w-9 h-9 rounded-xl bg-green-50 flex items-center justify-center flex-shrink-0">
-                  <Calendar size={17} className="text-green-600" />
+                className="flex items-center gap-3 bg-gradient-to-r from-green-500 to-green-600 rounded-2xl shadow-lg shadow-green-500/20 px-4 py-3 hover:shadow-xl transition-shadow">
+                <div className="w-12 h-12 rounded-2xl bg-white/20 flex flex-col items-center justify-center flex-shrink-0">
+                  <span className="text-[10px] font-bold text-white uppercase">
+                    {MONTHS[new Date(data.nextSession.date).getMonth()].slice(0,3)}
+                  </span>
+                  <span className="text-xl font-black text-white leading-none">{new Date(data.nextSession.date).getDate()}</span>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold text-gray-900">אימון קרוב</p>
-                  <p className="text-xs text-gray-400">
+                  <p className="text-white font-bold text-sm">האימון הקרוב שלי</p>
+                  <p className="text-white/80 text-xs mt-0.5">
                     {new Date(data.nextSession.date).toLocaleDateString('he-IL', { weekday: 'long', day: 'numeric', month: 'long' })}
                     {data.nextSession.time && ` · ${data.nextSession.time}`}
+                    {data.nextSession.duration && ` · ${data.nextSession.duration} דק׳`}
                   </p>
                 </div>
-                <div className="text-center flex-shrink-0">
-                  <p className="text-lg font-black text-green-600 leading-none">{new Date(data.nextSession.date).getDate()}</p>
-                  <p className="text-[10px] text-green-500">{MONTHS[new Date(data.nextSession.date).getMonth()].slice(0,3)}</p>
-                </div>
+                <CheckCircle size={18} className="text-white/70 flex-shrink-0" />
               </Link>
             )}
 
