@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { CheckCircle, Users, Calendar, FileText, TrendingUp, MessageCircle, Share2, Zap, Star, Building2 } from 'lucide-react'
+import { CheckCircle, Users, Calendar, FileText, TrendingUp, MessageCircle, Share2, Zap, Star, Building2, ArrowLeft, Phone, BarChart2, Dumbbell, Target, ChevronRight } from 'lucide-react'
 
 const FEATURES = [
   { icon: Users,         title: 'ניהול לקוחות',       desc: 'כרטסת לקוחות מלאה, היסטוריה, תוכניות אישיות ומעקב התקדמות.' },
@@ -40,7 +40,7 @@ const PRICING = [
     highlight: true,
     badge:     'הכי פופולרי ⭐',
     maxClients: 'עד 50 לקוחות',
-    features:  ['עד 50 לקוחות', 'כל פיצ׳רי Starter', 'דוחות מתקדמים', 'אינטגרציית Google Calendar', 'WhatsApp תזכורות', 'תמיכה מועדפת'],
+    features:  ['עד 50 לקוחות', 'כל פיצ׳רי Starter', 'דוחות מתקדמים', 'ניהול לידים ו-CRM', 'WhatsApp תזכורות', 'תמיכה מועדפת'],
   },
   {
     name:      'Studio',
@@ -55,6 +55,184 @@ const PRICING = [
     features:  ['לקוחות ללא הגבלה', 'כל פיצ׳רי Pro', 'מיתוג אישי', 'API גישה', 'תמיכת VIP 24/7'],
   },
 ]
+
+const HOW_IT_WORKS = [
+  {
+    step: '01',
+    title: 'נרשם ומגדיר את העסק',
+    desc: 'הרשמה ב-2 דקות — שם העסק, תחום, תמונת פרופיל. מוכן לעבודה.',
+    color: 'from-[#00969E] to-[#007A81]',
+  },
+  {
+    step: '02',
+    title: 'מוסיף לקוחות ותוכניות',
+    desc: 'הוסף לקוחות, צור תוכניות אימון/תזונה עם AI, ושבץ ללקוחות.',
+    color: 'from-purple-500 to-purple-700',
+  },
+  {
+    step: '03',
+    title: 'מתאמן רואה הכל מהנייד',
+    desc: 'הלקוח מקבל גישה אישית — הזמנת אימונים, תוכניות, גרפים וצ׳אט.',
+    color: 'from-orange-400 to-orange-600',
+  },
+]
+
+/* ── Mock Dashboard UI component ── */
+function DashboardMockup() {
+  return (
+    <div className="relative" dir="ltr">
+      {/* Main dashboard card */}
+      <div className="bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden">
+        {/* Top bar */}
+        <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-50 bg-gradient-to-r from-[#0A1628] to-[#0D1F3C]">
+          <div className="w-7 h-7 rounded-lg bg-[#00969E] flex items-center justify-center">
+            <span className="text-white font-black text-[9px]">UW</span>
+          </div>
+          <span className="text-white font-bold text-sm">UpWell</span>
+          <div className="mr-auto flex gap-1.5">
+            <div className="w-2.5 h-2.5 rounded-full bg-red-400" />
+            <div className="w-2.5 h-2.5 rounded-full bg-yellow-400" />
+            <div className="w-2.5 h-2.5 rounded-full bg-green-400" />
+          </div>
+        </div>
+        <div className="p-5">
+          {/* Greeting */}
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <p className="text-xs text-gray-400">בוקר טוב,</p>
+              <p className="font-black text-gray-900 text-sm">יוני פיטנס 💪</p>
+            </div>
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#00969E] to-green-500 flex items-center justify-center text-white font-bold text-xs">Y</div>
+          </div>
+
+          {/* Stat cards */}
+          <div className="grid grid-cols-4 gap-2 mb-4">
+            {[
+              { icon: '👥', val: '47',  label: 'לקוחות', color: 'bg-teal-50' },
+              { icon: '🏋️', val: '12',  label: 'תוכניות', color: 'bg-purple-50' },
+              { icon: '📅', val: '28',  label: 'אימונים', color: 'bg-orange-50' },
+              { icon: '📈', val: '94%', label: 'שימור', color: 'bg-green-50' },
+            ].map(s => (
+              <div key={s.label} className={`${s.color} rounded-xl p-2.5 text-center`}>
+                <p className="text-base">{s.icon}</p>
+                <p className="font-black text-gray-900 text-xs">{s.val}</p>
+                <p className="text-[9px] text-gray-400">{s.label}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Mini chart */}
+          <div className="bg-gray-50 rounded-2xl p-3 mb-3">
+            <p className="text-[10px] text-gray-400 mb-2 font-semibold">אימונים החודש</p>
+            <div className="flex items-end gap-1 h-10">
+              {[4,7,5,9,6,11,8,13,10,8,12,9,14,11].map((v,i) => (
+                <div key={i} className="flex-1 rounded-sm transition-all"
+                  style={{ height: `${(v/14)*100}%`, background: i === 13 ? '#00969E' : '#E6F7F8' }} />
+              ))}
+            </div>
+          </div>
+
+          {/* Recent clients mini list */}
+          <div className="space-y-1.5">
+            {[
+              { name: 'שרה כהן', status: 'אימון מחר', dot: 'bg-green-400' },
+              { name: 'דני לוי', status: 'תוכנית חדשה', dot: 'bg-blue-400' },
+              { name: 'מיכל ברק', status: 'דיווח ממתין', dot: 'bg-orange-400' },
+            ].map(c => (
+              <div key={c.name} className="flex items-center gap-2.5 bg-white rounded-xl px-3 py-2 border border-gray-50 shadow-sm">
+                <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-[#00969E]/20 to-[#00969E]/5 flex items-center justify-center text-[#00969E] font-bold text-[10px]">
+                  {c.name[0]}
+                </div>
+                <span className="text-[11px] font-semibold text-gray-900 flex-1">{c.name}</span>
+                <span className={`w-1.5 h-1.5 rounded-full ${c.dot}`} />
+                <span className="text-[9px] text-gray-400">{c.status}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Floating notification card */}
+      <div className="absolute -bottom-6 -left-8 bg-white rounded-2xl shadow-xl border border-gray-100 p-3 flex items-center gap-2.5 w-48">
+        <div className="w-8 h-8 bg-green-500 rounded-xl flex items-center justify-center flex-shrink-0">
+          <MessageCircle size={14} className="text-white" />
+        </div>
+        <div>
+          <p className="text-[10px] font-bold text-gray-900">WhatsApp נשלח ✓</p>
+          <p className="text-[9px] text-gray-400">תזכורת לשרה כהן</p>
+        </div>
+      </div>
+
+      {/* Floating revenue card */}
+      <div className="absolute -top-5 -right-6 bg-gradient-to-br from-[#00969E] to-[#005f66] rounded-2xl shadow-xl p-3 text-white w-36">
+        <p className="text-[9px] text-white/70 mb-0.5">הכנסה החודש</p>
+        <p className="font-black text-lg">₪8,900</p>
+        <p className="text-[9px] text-green-300 flex items-center gap-1">▲ 18% מהחודש שעבר</p>
+      </div>
+    </div>
+  )
+}
+
+/* ── Mock Trainee Phone UI ── */
+function PhoneMockup() {
+  return (
+    <div className="relative mx-auto w-48" dir="ltr">
+      {/* Phone frame */}
+      <div className="bg-gray-900 rounded-[2.5rem] p-2 shadow-2xl">
+        <div className="bg-white rounded-[2rem] overflow-hidden">
+          {/* Status bar */}
+          <div className="bg-gradient-to-r from-[#00969E] to-[#005f66] px-4 pt-3 pb-5">
+            <div className="flex justify-between text-[8px] text-white/60 mb-3">
+              <span>9:41</span><span>●●●</span>
+            </div>
+            <p className="text-[9px] text-white/70">שלום שרה 👋</p>
+            <p className="text-white font-black text-sm">האימון הבא</p>
+            <p className="text-white/80 text-[10px]">מחר · 10:00 · יוני</p>
+          </div>
+
+          {/* Metrics */}
+          <div className="grid grid-cols-3 gap-1.5 p-3 -mt-2">
+            {[['⚖️','72.3','ק"ג'],['🔥','18%','שומן'],['📏','78','מותן']].map(([e,v,u]) => (
+              <div key={u} className="bg-gray-50 rounded-xl p-2 text-center">
+                <p className="text-xs">{e}</p>
+                <p className="font-black text-gray-900 text-[11px]">{v}</p>
+                <p className="text-[8px] text-gray-400">{u}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Program */}
+          <div className="px-3 pb-2">
+            <div className="bg-purple-50 rounded-xl p-2.5">
+              <p className="text-[9px] font-bold text-purple-700 mb-1">📋 התוכנית שלי</p>
+              {['שבוע 3 — כוח עליון','5 אימונים | 12 סרטונים'].map(t => (
+                <p key={t} className="text-[9px] text-gray-500">{t}</p>
+              ))}
+            </div>
+          </div>
+
+          {/* Chat bubble */}
+          <div className="px-3 pb-3">
+            <div className="bg-[#E6F7F8] rounded-xl p-2.5 flex items-start gap-2">
+              <div className="w-5 h-5 bg-[#00969E] rounded-lg flex items-center justify-center flex-shrink-0">
+                <MessageCircle size={10} className="text-white" />
+              </div>
+              <div>
+                <p className="text-[8px] font-semibold text-gray-700">מהמאמן</p>
+                <p className="text-[8px] text-gray-500">כל הכבוד על האימון! 💪</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Floating badge */}
+      <div className="absolute -top-3 -right-4 bg-green-500 text-white text-[9px] font-bold px-2 py-1 rounded-full shadow-lg">
+        Live ●
+      </div>
+    </div>
+  )
+}
 
 export default function Landing() {
   return (
@@ -74,6 +252,11 @@ export default function Landing() {
             </div>
             <span className="font-black text-xl text-gray-900">UpWell</span>
           </div>
+          <div className="hidden md:flex items-center gap-6 text-sm text-gray-500">
+            <a href="#features" className="hover:text-gray-900 transition-colors">פיצ׳רים</a>
+            <a href="#how-it-works" className="hover:text-gray-900 transition-colors">איך זה עובד</a>
+            <a href="#pricing" className="hover:text-gray-900 transition-colors">מחירים</a>
+          </div>
           <div className="flex items-center gap-3">
             <Link to="/login"  className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">כניסה</Link>
             <Link to="/signup" className="px-5 py-2 bg-[#00969E] hover:bg-[#007A81] text-white rounded-xl text-sm font-semibold transition-all shadow-lg shadow-[#00969E]/20">
@@ -83,41 +266,67 @@ export default function Landing() {
         </div>
       </nav>
 
-      {/* Hero */}
+      {/* ── Hero ── */}
       <section id="main-content" className="relative overflow-hidden bg-gradient-to-br from-[#00969E] via-[#007A81] to-[#005f66] text-white" aria-label="כותרת ראשית">
+        {/* BG blobs */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute -top-40 -right-40 w-96 h-96 bg-white/5 rounded-full" />
           <div className="absolute -bottom-20 -left-20 w-72 h-72 bg-white/5 rounded-full" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-white/3 rounded-full" />
+          <div className="absolute top-1/2 right-1/3 w-64 h-64 bg-white/3 rounded-full" />
         </div>
-        <div className="relative max-w-4xl mx-auto px-6 py-24 text-center">
-          <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur px-4 py-1.5 rounded-full text-sm font-medium mb-6">
-            <Zap size={14} className="text-yellow-300" />
-            פלטפורמה מספר 1 לאנשי וולנס בישראל
-          </div>
-          <h1 className="text-5xl md:text-6xl font-black leading-tight mb-6">
-            UpWell.<br />
-            <span className="text-white/80">לצמוח יחד.</span>
-          </h1>
-          <p className="text-xl text-white/80 max-w-2xl mx-auto leading-relaxed mb-10">
-            לקוחות, תוכניות, חשבוניות, סרטונים — הכל בפלטפורמה אחת!
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-            <Link to="/signup"
-              className="w-full sm:w-auto px-8 py-4 bg-white text-[#00969E] rounded-2xl font-black text-base hover:bg-gray-50 transition-all shadow-2xl">
-              התחל בחינם — ללא כרטיס אשראי
-            </Link>
-            <Link to="/login"
-              className="w-full sm:w-auto px-8 py-4 bg-white/15 hover:bg-white/25 text-white rounded-2xl font-semibold text-base backdrop-blur transition-all">
-              כניסה לחשבון קיים
-            </Link>
+
+        <div className="relative max-w-6xl mx-auto px-6 py-16 lg:py-20">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            {/* Text */}
+            <div>
+              <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur px-4 py-1.5 rounded-full text-sm font-medium mb-6">
+                <Zap size={14} className="text-yellow-300" />
+                פלטפורמה מספר 1 לאנשי וולנס בישראל
+              </div>
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-black leading-tight mb-6">
+                UpWell.<br />
+                <span className="text-white/80">לצמוח יחד.</span>
+              </h1>
+              <p className="text-lg text-white/80 leading-relaxed mb-8 max-w-lg">
+                לקוחות, תוכניות, חשבוניות, סרטונים — הכל בפלטפורמה אחת. המאמנים הכי טובים בישראל כבר כאן.
+              </p>
+              <div className="flex flex-col sm:flex-row items-center gap-3 mb-8">
+                <Link to="/signup"
+                  className="w-full sm:w-auto px-8 py-4 bg-white text-[#00969E] rounded-2xl font-black text-base hover:bg-gray-50 transition-all shadow-2xl flex items-center justify-center gap-2">
+                  התחל בחינם — ללא כרטיס אשראי
+                  <ArrowLeft size={16} />
+                </Link>
+                <Link to="/login"
+                  className="w-full sm:w-auto px-8 py-4 bg-white/15 hover:bg-white/25 text-white rounded-2xl font-semibold text-base backdrop-blur transition-all text-center">
+                  כניסה לחשבון קיים
+                </Link>
+              </div>
+              {/* Social proof avatars */}
+              <div className="flex items-center gap-3">
+                <div className="flex -space-x-2 rtl:space-x-reverse">
+                  {['Y','R','M','S','D'].map((l,i) => (
+                    <div key={i} className="w-8 h-8 rounded-full border-2 border-white bg-gradient-to-br from-[#00969E] to-green-500 flex items-center justify-center text-white text-xs font-bold">
+                      {l}
+                    </div>
+                  ))}
+                </div>
+                <p className="text-sm text-white/80">
+                  <strong className="text-white">2,400+</strong> מאמנים פעילים
+                </p>
+              </div>
+            </div>
+
+            {/* Dashboard mockup */}
+            <div className="hidden lg:flex justify-center items-center py-8">
+              <DashboardMockup />
+            </div>
           </div>
         </div>
       </section>
 
       {/* Stats */}
       <section className="bg-gray-50 border-y border-gray-100">
-        <div className="max-w-4xl mx-auto px-6 py-12 grid grid-cols-2 md:grid-cols-4 gap-8">
+        <div className="max-w-4xl mx-auto px-6 py-10 grid grid-cols-2 md:grid-cols-4 gap-6">
           {STATS.map(s => (
             <div key={s.label} className="text-center">
               <p className="text-3xl font-black text-[#00969E]">{s.value}</p>
@@ -127,38 +336,67 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Features */}
-      <section className="max-w-6xl mx-auto px-6 py-20">
+      {/* ── How it works ── */}
+      <section id="how-it-works" className="max-w-5xl mx-auto px-6 py-20">
         <div className="text-center mb-14">
-          <h2 className="text-3xl font-black text-gray-900 mb-3">כל מה שצריך כדי להצמיח את העסק שלך קדימה</h2>
-          <p className="text-gray-500 text-lg">תוכנה שמבינה את עסק הבריאות והוולנס שלך</p>
+          <span className="inline-block bg-[#E6F7F8] text-[#00969E] text-xs font-bold px-3 py-1 rounded-full mb-3">תהליך פשוט</span>
+          <h2 className="text-3xl font-black text-gray-900 mb-3">מוכן לעבוד תוך 5 דקות</h2>
+          <p className="text-gray-500 text-lg">שלושה צעדים ואתה מנהל את העסק שלך בצורה חכמה</p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {FEATURES.map(f => (
-            <div key={f.title} className="bg-white border border-gray-100 rounded-2xl p-6 hover:border-[#00969E]/20 hover:shadow-lg hover:shadow-[#00969E]/5 transition-all group">
-              <div className="w-12 h-12 bg-[#E6F7F8] rounded-2xl flex items-center justify-center mb-4 group-hover:bg-[#00969E] transition-colors">
-                <f.icon size={22} className="text-[#00969E] group-hover:text-white transition-colors" />
+        <div className="grid md:grid-cols-3 gap-8 relative">
+          {/* Connector line */}
+          <div className="hidden md:block absolute top-10 right-[16.6%] left-[16.6%] h-0.5 bg-gradient-to-l from-orange-200 via-purple-200 to-[#00969E]/30" />
+          {HOW_IT_WORKS.map((step, i) => (
+            <div key={i} className="text-center relative">
+              <div className={`w-20 h-20 rounded-3xl bg-gradient-to-br ${step.color} flex items-center justify-center mx-auto mb-5 shadow-lg shadow-black/10`}>
+                <span className="text-white font-black text-2xl">{step.step}</span>
               </div>
-              <h3 className="font-bold text-gray-900 text-base mb-2">{f.title}</h3>
-              <p className="text-gray-500 text-sm leading-relaxed">{f.desc}</p>
+              <h3 className="font-bold text-gray-900 text-lg mb-2">{step.title}</h3>
+              <p className="text-gray-500 text-sm leading-relaxed">{step.desc}</p>
             </div>
           ))}
         </div>
       </section>
 
-      {/* Trainee portal highlight */}
-      <section className="bg-gradient-to-br from-[#E6F7F8] to-white py-20">
+      {/* ── Features ── */}
+      <section id="features" className="bg-gray-50 py-20">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="text-center mb-14">
+            <span className="inline-block bg-[#E6F7F8] text-[#00969E] text-xs font-bold px-3 py-1 rounded-full mb-3">פיצ׳רים</span>
+            <h2 className="text-3xl font-black text-gray-900 mb-3">כל מה שצריך כדי להצמיח את העסק שלך</h2>
+            <p className="text-gray-500 text-lg">תוכנה שמבינה את עסק הבריאות והוולנס שלך</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {FEATURES.map(f => (
+              <div key={f.title} className="bg-white border border-gray-100 rounded-2xl p-6 hover:border-[#00969E]/20 hover:shadow-lg hover:shadow-[#00969E]/5 transition-all group">
+                <div className="w-12 h-12 bg-[#E6F7F8] rounded-2xl flex items-center justify-center mb-4 group-hover:bg-[#00969E] transition-colors">
+                  <f.icon size={22} className="text-[#00969E] group-hover:text-white transition-colors" />
+                </div>
+                <h3 className="font-bold text-gray-900 text-base mb-2">{f.title}</h3>
+                <p className="text-gray-500 text-sm leading-relaxed">{f.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Trainee portal ── */}
+      <section className="py-20">
         <div className="max-w-5xl mx-auto px-6">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
+          <div className="grid md:grid-cols-2 gap-16 items-center">
+            {/* Phone mockup */}
+            <div className="flex justify-center py-8">
+              <PhoneMockup />
+            </div>
             <div>
               <div className="inline-flex items-center gap-2 bg-[#00969E]/10 text-[#00969E] px-3 py-1 rounded-full text-xs font-bold mb-4">
-                ✨ חדש — פורטל מתאמן
+                ✨ פורטל מתאמן
               </div>
               <h2 className="text-3xl font-black text-gray-900 mb-4">המתאמנים שלך<br />יאהבו את החוויה</h2>
               <p className="text-gray-600 leading-relaxed mb-6">
                 כל מתאמן מקבל אפליקציה אישית — הזמנת אימונים לפי זמינות המאמן, צ׳אט בזמן אמת, מעקב מדדים עם גרפים, ויומן אוכל עם ניתוח קלוריות ב-AI.
               </p>
-              <ul className="space-y-3">
+              <ul className="space-y-3 mb-8">
                 {['הזמנת אימונים לפי זמינות בזמן אמת', 'צ׳אט ישיר + שיתוף תמונות', 'מעקב משקל ומדות עם גרף', 'יומן אוכל + ניתוח AI', 'צפייה בתוכניות אימון ווידאו'].map(t => (
                   <li key={t} className="flex items-center gap-2.5 text-sm text-gray-700">
                     <CheckCircle size={16} className="text-[#00969E] flex-shrink-0" />
@@ -166,40 +404,82 @@ export default function Landing() {
                   </li>
                 ))}
               </ul>
-            </div>
-            <div className="bg-white rounded-3xl border border-gray-100 shadow-xl p-6">
-              {/* Mock trainee portal UI */}
-              <div className="bg-gradient-to-br from-[#00969E] to-[#005f66] rounded-2xl p-5 text-white mb-4">
-                <p className="text-xs text-white/70 mb-1">שלום שרה 👋</p>
-                <p className="font-black text-lg">האימון הבא שלך</p>
-                <p className="text-white/80 text-sm mt-1">יום ג׳ · 10:00 · עם יוני מאמן</p>
-              </div>
-              <div className="grid grid-cols-3 gap-2 mb-4">
-                {[['⚖️', '72.3', 'ק"ג'], ['🔥', '18%', 'שומן'], ['📏', '78', 'מותן']].map(([e, v, u]) => (
-                  <div key={u} className="bg-gray-50 rounded-xl p-3 text-center">
-                    <p className="text-sm">{e}</p>
-                    <p className="font-black text-gray-900 text-sm">{v}</p>
-                    <p className="text-[10px] text-gray-400">{u}</p>
-                  </div>
-                ))}
-              </div>
-              <div className="bg-[#E6F7F8] rounded-xl p-3 flex items-center gap-3">
-                <div className="w-8 h-8 bg-[#00969E] rounded-lg flex items-center justify-center flex-shrink-0">
-                  <MessageCircle size={14} className="text-white" />
-                </div>
-                <div>
-                  <p className="text-xs font-semibold text-gray-700">הודעה חדשה מהמאמן</p>
-                  <p className="text-xs text-gray-400">כל הכבוד על האימון של אתמול! 💪</p>
-                </div>
-              </div>
+              <Link to="/signup" className="inline-flex items-center gap-2 px-6 py-3 bg-[#00969E] text-white rounded-2xl font-bold hover:bg-[#007A81] transition-all shadow-lg shadow-[#00969E]/20">
+                התחל חינם
+                <ArrowLeft size={15} />
+              </Link>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Pricing */}
+      {/* ── Leads / CRM highlight ── */}
+      <section className="bg-gradient-to-br from-purple-50 to-white py-20">
+        <div className="max-w-5xl mx-auto px-6">
+          <div className="grid md:grid-cols-2 gap-16 items-center">
+            <div>
+              <div className="inline-flex items-center gap-2 bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-xs font-bold mb-4">
+                🆕 חדש — ניהול לידים
+              </div>
+              <h2 className="text-3xl font-black text-gray-900 mb-4">הפוך פניות<br />ללקוחות משלמים</h2>
+              <p className="text-gray-600 leading-relaxed mb-6">
+                עקוב אחרי כל ליד מהרגע שפנה אליך — מקור הפניה, שלב הפאנל, תאריך מעקב, ושלח תזכורת WhatsApp בלחיצה אחת.
+              </p>
+              <ul className="space-y-3">
+                {['פאנל מכירות חזותי (חדש ← עניין ← לקוח)', 'שלח WhatsApp ישירות מהמערכת', 'תזכורות מעקב עם תאריך', 'סטטיסטיקות המרה'].map(t => (
+                  <li key={t} className="flex items-center gap-2.5 text-sm text-gray-700">
+                    <CheckCircle size={16} className="text-purple-500 flex-shrink-0" />
+                    {t}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            {/* CRM mockup */}
+            <div className="bg-white rounded-3xl border border-gray-100 shadow-xl p-5">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <Target size={16} className="text-purple-600" />
+                  <span className="font-bold text-gray-900 text-sm">לידים פעילים</span>
+                </div>
+                <span className="bg-purple-100 text-purple-700 text-xs font-bold px-2.5 py-1 rounded-full">8 לידים</span>
+              </div>
+              {/* Funnel pills */}
+              <div className="flex gap-2 mb-4 flex-wrap">
+                {[['3','🆕 חדש','blue'],['2','🔥 עניין','orange'],['2','✅ הומר','green'],['1','❌ אבד','red']].map(([n,l,c]) => (
+                  <span key={l} className={`px-2.5 py-1 rounded-full text-xs font-semibold bg-${c}-100 text-${c}-700`}>
+                    {n} {l}
+                  </span>
+                ))}
+              </div>
+              {/* Lead cards */}
+              {[
+                { name: 'אורן שמש', status: '🔥 מעוניין', src: 'Instagram', phone: '05X' },
+                { name: 'טל גפן', status: '📞 נוצר קשר', src: 'המלצה', phone: '05X' },
+                { name: 'ליאת מור', status: '🆕 חדש', src: 'אתר', phone: '05X' },
+              ].map(l => (
+                <div key={l.name} className="flex items-center gap-3 bg-gray-50 rounded-2xl px-4 py-3 mb-2">
+                  <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-purple-200 to-purple-100 flex items-center justify-center text-purple-700 font-bold text-sm flex-shrink-0">
+                    {l.name[0]}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-gray-900">{l.name}</p>
+                    <p className="text-xs text-gray-400">{l.src}</p>
+                  </div>
+                  <span className="text-xs font-medium text-gray-600">{l.status}</span>
+                  <div className="w-6 h-6 bg-green-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Phone size={10} className="text-white" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Pricing ── */}
       <section className="max-w-5xl mx-auto px-6 py-20" id="pricing">
         <div className="text-center mb-4">
+          <span className="inline-block bg-[#E6F7F8] text-[#00969E] text-xs font-bold px-3 py-1 rounded-full mb-3">מחירים</span>
           <h2 className="text-3xl font-black text-gray-900 mb-3">מחירים שקופים</h2>
           <p className="text-gray-500 text-lg">שדרג בכל עת · בטל בכל עת · ללא עמלות נסתרות</p>
         </div>
@@ -214,14 +494,11 @@ export default function Landing() {
           {PRICING.map(p => (
             <div key={p.name}
               className={`relative bg-white rounded-3xl border-2 p-7 flex flex-col ${p.color} ${p.highlight ? 'shadow-2xl shadow-[#00969E]/15 md:-mt-4 md:-mb-4' : ''}`}>
-
               {p.badge && (
                 <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-[#00969E] text-white text-xs font-bold px-4 py-1.5 rounded-full whitespace-nowrap shadow-lg shadow-[#00969E]/30">
                   {p.badge}
                 </div>
               )}
-
-              {/* Icon + name */}
               <div className="flex items-center gap-3 mb-5">
                 <div className={`w-11 h-11 rounded-2xl bg-gradient-to-br ${p.iconColor} flex items-center justify-center shadow-md`}>
                   <p.icon size={20} className="text-white" />
@@ -231,8 +508,6 @@ export default function Landing() {
                   <p className="text-xs text-gray-400">{p.maxClients}</p>
                 </div>
               </div>
-
-              {/* Price */}
               <div className="mb-6">
                 <div className="flex items-baseline gap-1">
                   <span className="text-4xl font-black text-gray-900">{p.price}</span>
@@ -240,8 +515,6 @@ export default function Landing() {
                 </div>
                 <p className="text-xs text-[#00969E] font-semibold mt-1">+ חודש ניסיון חינם</p>
               </div>
-
-              {/* Features */}
               <ul className="space-y-3 mb-8 flex-1">
                 {p.features.map(f => (
                   <li key={f} className="flex items-center gap-2.5 text-sm text-gray-700">
@@ -250,7 +523,6 @@ export default function Landing() {
                   </li>
                 ))}
               </ul>
-
               <Link to="/signup"
                 className={`w-full py-3.5 rounded-2xl text-sm font-bold text-center transition-all ${
                   p.highlight
@@ -266,6 +538,40 @@ export default function Landing() {
         <p className="text-center text-xs text-gray-400 mt-8">כל המחירים כוללים מע"מ · תשלום חודשי · ביטול בכל עת</p>
       </section>
 
+      {/* ── Testimonials ── */}
+      <section className="bg-gray-50 py-20">
+        <div className="max-w-5xl mx-auto px-6">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-black text-gray-900 mb-3">מה המאמנים אומרים</h2>
+          </div>
+          <div className="grid md:grid-cols-3 gap-6">
+            {[
+              { name: 'יוני כהן', role: 'מאמן כושר אישי', stars: 5, text: 'חסכתי 3 שעות שבועיות על ניהול. הלקוחות שלי מאושרים יותר כי הם רואים את ההתקדמות שלהם.' },
+              { name: 'דנה לוי', role: 'תזונאית קלינית', stars: 5, text: 'יומן האוכל עם AI הוא פשוט קסם. הלקוחות מצלמים ומקבלים ניתוח מיידי — זה שינה את המשחק.' },
+              { name: 'אלון שפירא', role: 'בעל סטודיו כושר', stars: 5, text: 'ניהול 40+ לקוחות עם UpWell זה יותר קל מלנהל 10 לקוחות עם Excel. ממליץ בחום.' },
+            ].map(t => (
+              <div key={t.name} className="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm hover:shadow-md transition-shadow">
+                <div className="flex gap-0.5 mb-4">
+                  {Array.from({length: t.stars}).map((_, i) => (
+                    <span key={i} className="text-yellow-400 text-sm">★</span>
+                  ))}
+                </div>
+                <p className="text-gray-700 text-sm leading-relaxed mb-5">"{t.text}"</p>
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#00969E] to-green-500 flex items-center justify-center text-white font-bold text-sm">
+                    {t.name[0]}
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-gray-900">{t.name}</p>
+                    <p className="text-xs text-gray-400">{t.role}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* CTA */}
       <section className="bg-gradient-to-br from-[#00969E] to-[#005f66] py-20">
         <div className="max-w-2xl mx-auto px-6 text-center text-white">
@@ -275,6 +581,7 @@ export default function Landing() {
             className="inline-block px-10 py-4 bg-white text-[#00969E] rounded-2xl font-black text-base hover:bg-gray-50 transition-all shadow-2xl">
             התחל בחינם — ללא כרטיס אשראי
           </Link>
+          <p className="text-white/50 text-xs mt-4">ללא כרטיס אשראי · ביטול בכל עת · תמיכה בעברית</p>
         </div>
       </section>
 
@@ -289,10 +596,10 @@ export default function Landing() {
           </div>
           <p className="text-sm text-gray-400">© 2026 UpWell. כל הזכויות שמורות.</p>
           <nav className="flex gap-4 text-sm" aria-label="קישורים משפטיים">
-            <Link to="/privacy" className="text-gray-400 hover:text-gray-700 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00969E] rounded transition-colors">פרטיות</Link>
-            <Link to="/terms"   className="text-gray-400 hover:text-gray-700 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00969E] rounded transition-colors">תנאים</Link>
-            <Link to="/health"  className="text-gray-400 hover:text-gray-700 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00969E] rounded transition-colors">כתב ויתור בריאות</Link>
-            <a href="mailto:assaf8@gmail.com" className="text-gray-400 hover:text-gray-700 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00969E] rounded transition-colors">צור קשר</a>
+            <Link to="/privacy" className="text-gray-400 hover:text-gray-700 transition-colors">פרטיות</Link>
+            <Link to="/terms"   className="text-gray-400 hover:text-gray-700 transition-colors">תנאים</Link>
+            <Link to="/health"  className="text-gray-400 hover:text-gray-700 transition-colors">כתב ויתור בריאות</Link>
+            <a href="mailto:assaf8@gmail.com" className="text-gray-400 hover:text-gray-700 transition-colors">צור קשר</a>
           </nav>
         </div>
       </footer>

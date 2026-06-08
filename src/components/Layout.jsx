@@ -1,29 +1,33 @@
 import { useState, useEffect } from 'react'
-import { NavLink, useNavigate, useLocation } from 'react-router-dom'
+import { NavLink, useNavigate, useLocation, Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import {
   LayoutDashboard, Users, Dumbbell, Calendar, Share2,
-  FileText, Settings, LogOut, Menu, X, ChevronLeft, Bell, MessageCircle
+  FileText, Settings, LogOut, Menu, X, ChevronLeft, Bell, MessageCircle,
+  Target, AlertCircle, CreditCard
 } from 'lucide-react'
 import api from '../lib/api'
 
 const nav = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'לוח בקרה' },
-  { to: '/clients', icon: Users, label: 'לקוחות' },
-  { to: '/programs', icon: Dumbbell, label: 'תוכניות' },
-  { to: '/calendar', icon: Calendar, label: 'יומן' },
-  { to: '/social', icon: Share2, label: 'רשתות חברתיות' },
-  { to: '/invoices', icon: FileText, label: 'חשבוניות' },
+  { to: '/clients',   icon: Users,            label: 'לקוחות' },
+  { to: '/leads',     icon: Target,           label: 'לידים' },
+  { to: '/programs',  icon: Dumbbell,         label: 'תוכניות' },
+  { to: '/calendar',  icon: Calendar,         label: 'יומן' },
+  { to: '/social',    icon: Share2,           label: 'רשתות חברתיות' },
+  { to: '/invoices',  icon: FileText,         label: 'חשבוניות' },
 ]
 
 const pageTitle = {
   '/dashboard': 'לוח בקרה',
-  '/clients': 'לקוחות',
-  '/programs': 'תוכניות',
-  '/calendar': 'יומן',
-  '/social': 'רשתות חברתיות',
-  '/invoices': 'חשבוניות',
-  '/settings': 'הגדרות',
+  '/clients':   'לקוחות',
+  '/leads':     'לידים',
+  '/programs':  'תוכניות',
+  '/calendar':  'יומן',
+  '/social':    'רשתות חברתיות',
+  '/invoices':  'חשבוניות',
+  '/settings':  'הגדרות',
+  '/billing':   'מנוי וחיוב',
 }
 
 export default function Layout({ children }) {
@@ -32,11 +36,26 @@ export default function Layout({ children }) {
   const location = useLocation()
   const [open, setOpen] = useState(false)
   const [unread, setUnread] = useState({ unreadMessages: 0, pendingRequests: 0 })
+  const [subBanner, setSubBanner] = useState(null) // null | { type: 'trial'|'expired'|'blocked', days: number }
 
   useEffect(() => {
-    const fetch = () => api.get('/inbox/unread').then(r => setUnread(r.data)).catch(() => {})
-    fetch()
-    const interval = setInterval(fetch, 30000) // refresh every 30s
+    const fetchUnread = () => api.get('/inbox/unread').then(r => setUnread(r.data)).catch(() => {})
+    fetchUnread()
+    const interval = setInterval(fetchUnread, 30000)
+
+    // Subscription status check
+    api.get('/subscription/my').then(r => {
+      const sub = r.data
+      if (sub.status === 'blocked') {
+        setSubBanner({ type: 'blocked', days: 0 })
+      } else if (sub.status === 'trial') {
+        const days = sub.daysLeftInTrial ?? 0
+        if (days <= 7) setSubBanner({ type: 'trial', days })
+      } else if (sub.status === 'past_due') {
+        setSubBanner({ type: 'expired', days: 0 })
+      }
+    }).catch(() => {})
+
     return () => clearInterval(interval)
   }, [])
 
@@ -145,6 +164,21 @@ export default function Layout({ children }) {
             </div>
           </div>
         </header>
+
+        {/* Subscription banner */}
+        {subBanner && (
+          <div className={`px-6 py-2.5 flex items-center gap-3 text-sm font-medium ${
+            subBanner.type === 'blocked' ? 'bg-red-500 text-white' :
+            subBanner.type === 'expired' ? 'bg-red-400 text-white' :
+            'bg-amber-400 text-amber-900'
+          }`}>
+            <AlertCircle size={15} />
+            {subBanner.type === 'blocked' && <span>החשבון שלך חסום — <Link to="/billing" className="underline font-bold">שדרג עכשיו</Link> כדי להמשיך.</span>}
+            {subBanner.type === 'expired'  && <span>תקופת הניסיון הסתיימה — <Link to="/billing" className="underline font-bold">בחר תכנית</Link> כדי להמשיך.</span>}
+            {subBanner.type === 'trial'    && <span>נותרו <strong>{subBanner.days}</strong> ימים בתקופת הניסיון — <Link to="/billing" className="underline font-bold">שדרג</Link> כדי לא לאבד גישה.</span>}
+            <button onClick={() => setSubBanner(null)} className="mr-auto opacity-70 hover:opacity-100"><X size={14} /></button>
+          </div>
+        )}
 
         <main className="flex-1 overflow-y-auto">
           {children}

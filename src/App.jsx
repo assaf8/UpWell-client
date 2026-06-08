@@ -31,6 +31,7 @@ import TraineeFoodLog from './pages/trainee/TraineeFoodLog'
 import TraineeProgress from './pages/trainee/TraineeProgress'
 import Admin from './pages/Admin'
 import Billing from './pages/Billing'
+import Leads from './pages/Leads'
 
 function PrivateRoute({ children }) {
   const { user } = useAuth()
@@ -94,6 +95,7 @@ export default function App() {
             <Route path="/programs/:id/edit"            element={<PrivateRoute><ProgramForm /></PrivateRoute>} />
             <Route path="/programs/:id/assign"          element={<PrivateRoute><AssignProgram /></PrivateRoute>} />
             <Route path="/client-programs/:id"          element={<PrivateRoute><ClientProgramView /></PrivateRoute>} />
+            <Route path="/leads"                        element={<PrivateRoute><Leads /></PrivateRoute>} />
             <Route path="/calendar"                     element={<PrivateRoute><Calendar /></PrivateRoute>} />
             <Route path="/social"                       element={<PrivateRoute><Social /></PrivateRoute>} />
             <Route path="/invoices"                     element={<PrivateRoute><Invoices /></PrivateRoute>} />

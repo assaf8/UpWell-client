@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Users, Dumbbell, Calendar, TrendingUp, ArrowLeft, Plus, ArrowUpRight, MessageCircle, Clock, Bell } from 'lucide-react'
+import { Users, Dumbbell, Calendar, TrendingUp, ArrowLeft, Plus, ArrowUpRight, MessageCircle, Clock, Bell, AlertTriangle, Target, Phone } from 'lucide-react'
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar, CartesianGrid } from 'recharts'
 import api from '../lib/api'
 import { useAuth } from '../contexts/AuthContext'
@@ -53,11 +53,13 @@ export default function Dashboard() {
   const [stats, setStats] = useState(null)
   const [recentClients, setRecentClients] = useState([])
   const [inbox, setInbox] = useState({ unreadMessages: 0, pendingRequests: 0 })
+  const [atRisk, setAtRisk] = useState([])
 
   useEffect(() => {
     api.get('/dashboard/stats').then(r => setStats(r.data)).catch(() => {})
     api.get('/clients?limit=5').then(r => setRecentClients(r.data.clients || [])).catch(() => {})
     api.get('/inbox/unread').then(r => setInbox(r.data)).catch(() => {})
+    api.get('/dashboard/at-risk').then(r => setAtRisk(r.data)).catch(() => {})
   }, [])
 
   const greeting = () => {
@@ -180,7 +182,8 @@ export default function Dashboard() {
             {[
               { to: '/clients/new', label: 'הוסף לקוח חדש', sub: 'צור פרופיל לקוח', color: 'bg-[#E6F7F8] text-[#00969E]' },
               { to: '/programs/new', label: 'צור תוכנית', sub: 'בנה תוכנית אימון', color: 'bg-purple-50 text-purple-600' },
-              { to: '/invoices', label: 'חשבונית חדשה', sub: 'חייב לקוח', color: 'bg-orange-50 text-orange-600' },
+              { to: '/leads', label: 'נהל לידים', sub: 'לקוחות פוטנציאליים', color: 'bg-orange-50 text-orange-600' },
+              { to: '/invoices', label: 'חשבונית חדשה', sub: 'חייב לקוח', color: 'bg-blue-50 text-blue-600' },
             ].map(a => (
               <Link key={a.to} to={a.to} className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors group">
                 <div className={`w-8 h-8 rounded-lg ${a.color} flex items-center justify-center`}>
@@ -196,7 +199,47 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-sm">
+        <div className="lg:col-span-2 space-y-4">
+          {/* At-risk clients widget */}
+          {atRisk.length > 0 && (
+            <div className="bg-white rounded-2xl border border-orange-100 shadow-sm">
+              <div className="flex items-center justify-between px-5 py-4 border-b border-orange-50">
+                <div className="flex items-center gap-2">
+                  <AlertTriangle size={16} className="text-orange-500" />
+                  <h3 className="font-bold text-gray-900">לקוחות שלא אימנו לאחרונה</h3>
+                  <span className="bg-orange-100 text-orange-700 text-xs font-bold px-2 py-0.5 rounded-full">{atRisk.length}</span>
+                </div>
+                <Link to="/clients" className="text-xs text-[#00969E] font-semibold hover:underline">כל הלקוחות</Link>
+              </div>
+              <ul className="divide-y divide-gray-50">
+                {atRisk.slice(0, 4).map(c => (
+                  <li key={c._id} className="flex items-center gap-3 px-5 py-3">
+                    <div className="w-9 h-9 rounded-xl bg-orange-50 flex items-center justify-center text-orange-600 font-bold text-sm flex-shrink-0">
+                      {c.name[0]}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-gray-900">{c.name}</p>
+                      <p className="text-xs text-gray-400">
+                        {c.daysSince !== null ? `לא אימן ${c.daysSince} ימים` : 'טרם אימן'}
+                      </p>
+                    </div>
+                    {c.phone && (
+                      <a href={`https://wa.me/972${c.phone.replace(/\D/g,'').replace(/^0/,'')}?text=${encodeURIComponent(`היי ${c.name}! 👋 מתגעגעים אליך. מתי נקבע אימון?`)}`}
+                        target="_blank" rel="noreferrer"
+                        className="w-8 h-8 rounded-lg bg-green-500 hover:bg-green-600 flex items-center justify-center transition-colors flex-shrink-0" title="שלח WhatsApp">
+                        <MessageCircle size={13} className="text-white" />
+                      </a>
+                    )}
+                    <Link to={`/clients/${c._id}`} className="text-gray-300 hover:text-[#00969E]">
+                      <ArrowLeft size={14} />
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm">
           <div className="flex items-center justify-between px-5 py-4 border-b border-gray-50">
             <h3 className="font-bold text-gray-900">לקוחות אחרונים</h3>
             <Link to="/clients" className="text-xs text-[#00969E] font-semibold hover:underline flex items-center gap-1">
@@ -229,6 +272,7 @@ export default function Dashboard() {
               ))}
             </ul>
           )}
+        </div>
         </div>
       </div>
     </div>
