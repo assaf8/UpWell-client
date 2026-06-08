@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { CheckCircle, Users, Calendar, FileText, TrendingUp, MessageCircle, Share2, Zap } from 'lucide-react'
+import { CheckCircle, Users, Calendar, FileText, TrendingUp, MessageCircle, Share2, Zap, Star, Building2 } from 'lucide-react'
 
 const FEATURES = [
   { icon: Users,         title: 'ניהול לקוחות',       desc: 'כרטסת לקוחות מלאה, היסטוריה, תוכניות אישיות ומעקב התקדמות.' },
@@ -14,33 +14,45 @@ const STATS = [
   { value: '2,400+', label: 'מאמנים פעילים' },
   { value: '18K+',   label: 'תוכניות נוצרו'  },
   { value: '94%',    label: 'שימור לקוחות'   },
-  { value: '₪0',     label: 'עלות להתחלה'    },
+  { value: 'חינם',   label: 'חודש ניסיון'    },
 ]
 
 const PRICING = [
   {
-    name: 'Starter',
-    price: '₪0',
-    period: 'לנצח',
-    color: 'border-gray-100',
+    name:      'Starter',
+    price:     '₪49',
+    period:    'לחודש',
+    icon:      Zap,
+    color:     'border-gray-100',
+    iconColor: 'from-blue-500 to-blue-600',
     highlight: false,
-    features: ['עד 5 לקוחות', 'יומן אימונים', 'פורטל מתאמן בסיסי', 'צ׳אט'],
+    badge:     null,
+    maxClients: 'עד 10 לקוחות',
+    features:  ['עד 10 לקוחות', 'יומן אימונים', 'צ׳אט בזמן אמת', 'תוכניות אימון ותזונה', 'אפליקציית לקוח'],
   },
   {
-    name: 'Pro',
-    price: '₪149',
-    period: 'לחודש',
-    color: 'border-[#00969E]',
+    name:      'Pro',
+    price:     '₪199',
+    period:    'לחודש',
+    icon:      Star,
+    color:     'border-[#00969E]',
+    iconColor: 'from-[#00969E] to-[#005f66]',
     highlight: true,
-    features: ['לקוחות ללא הגבלה', 'WhatsApp תזכורות', 'חשבוניות + PDF', 'Instagram פרסום', 'מעקב מדדים + גרפים', 'AI ניתוח קלוריות'],
+    badge:     'הכי פופולרי ⭐',
+    maxClients: 'עד 50 לקוחות',
+    features:  ['עד 50 לקוחות', 'כל פיצ׳רי Starter', 'דוחות מתקדמים', 'אינטגרציית Google Calendar', 'WhatsApp תזכורות', 'תמיכה מועדפת'],
   },
   {
-    name: 'Studio',
-    price: '₪399',
-    period: 'לחודש',
-    color: 'border-gray-100',
+    name:      'Studio',
+    price:     '₪349',
+    period:    'לחודש',
+    icon:      Building2,
+    color:     'border-gray-100',
+    iconColor: 'from-amber-500 to-orange-500',
     highlight: false,
-    features: ['הכל ב-Pro', 'מאמנים מרובים', 'לוגו מותאם אישית', 'API גישה', 'תמיכה עדיפותית'],
+    badge:     null,
+    maxClients: 'לקוחות ללא הגבלה',
+    features:  ['לקוחות ללא הגבלה', 'כל פיצ׳רי Pro', 'מיתוג אישי', 'API גישה', 'תמיכת VIP 24/7'],
   },
 ]
 
@@ -186,46 +198,72 @@ export default function Landing() {
       </section>
 
       {/* Pricing */}
-      <section className="max-w-5xl mx-auto px-6 py-20">
-        <div className="text-center mb-14">
+      <section className="max-w-5xl mx-auto px-6 py-20" id="pricing">
+        <div className="text-center mb-4">
           <h2 className="text-3xl font-black text-gray-900 mb-3">מחירים שקופים</h2>
-          <p className="text-gray-500">שדרג בכל עת. בטל בכל עת.</p>
+          <p className="text-gray-500 text-lg">שדרג בכל עת · בטל בכל עת · ללא עמלות נסתרות</p>
         </div>
+
+        {/* Free trial banner */}
+        <div className="flex items-center justify-center gap-2 bg-gradient-to-r from-[#E6F7F8] to-blue-50 border border-[#00969E]/20 rounded-2xl px-6 py-3 mb-10 w-fit mx-auto">
+          <Zap size={16} className="text-[#00969E]" />
+          <p className="text-sm font-bold text-[#007A81]">החודש הראשון חינם לכולם — ללא כרטיס אשראי</p>
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {PRICING.map(p => (
             <div key={p.name}
-              className={`relative bg-white rounded-3xl border-2 p-7 flex flex-col ${p.color} ${p.highlight ? 'shadow-2xl shadow-[#00969E]/10 scale-105' : ''}`}>
-              {p.highlight && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#00969E] text-white text-xs font-bold px-4 py-1 rounded-full">
-                  הכי פופולרי
+              className={`relative bg-white rounded-3xl border-2 p-7 flex flex-col ${p.color} ${p.highlight ? 'shadow-2xl shadow-[#00969E]/15 md:-mt-4 md:-mb-4' : ''}`}>
+
+              {p.badge && (
+                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-[#00969E] text-white text-xs font-bold px-4 py-1.5 rounded-full whitespace-nowrap shadow-lg shadow-[#00969E]/30">
+                  {p.badge}
                 </div>
               )}
+
+              {/* Icon + name */}
+              <div className="flex items-center gap-3 mb-5">
+                <div className={`w-11 h-11 rounded-2xl bg-gradient-to-br ${p.iconColor} flex items-center justify-center shadow-md`}>
+                  <p.icon size={20} className="text-white" />
+                </div>
+                <div>
+                  <p className="font-black text-gray-900 text-lg">{p.name}</p>
+                  <p className="text-xs text-gray-400">{p.maxClients}</p>
+                </div>
+              </div>
+
+              {/* Price */}
               <div className="mb-6">
-                <p className="font-bold text-gray-500 text-sm mb-1">{p.name}</p>
                 <div className="flex items-baseline gap-1">
                   <span className="text-4xl font-black text-gray-900">{p.price}</span>
                   <span className="text-gray-400 text-sm">/{p.period}</span>
                 </div>
+                <p className="text-xs text-[#00969E] font-semibold mt-1">+ חודש ניסיון חינם</p>
               </div>
+
+              {/* Features */}
               <ul className="space-y-3 mb-8 flex-1">
                 {p.features.map(f => (
                   <li key={f} className="flex items-center gap-2.5 text-sm text-gray-700">
-                    <CheckCircle size={14} className={p.highlight ? 'text-[#00969E]' : 'text-gray-400'} />
+                    <CheckCircle size={14} className={p.highlight ? 'text-[#00969E]' : 'text-gray-300'} fill={p.highlight ? '#E6F7F8' : 'transparent'} />
                     {f}
                   </li>
                 ))}
               </ul>
+
               <Link to="/signup"
-                className={`w-full py-3 rounded-xl text-sm font-bold text-center transition-all ${
+                className={`w-full py-3.5 rounded-2xl text-sm font-bold text-center transition-all ${
                   p.highlight
                     ? 'bg-[#00969E] hover:bg-[#007A81] text-white shadow-lg shadow-[#00969E]/20'
                     : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
                 }`}>
-                התחל עכשיו
+                התחל חינם
               </Link>
             </div>
           ))}
         </div>
+
+        <p className="text-center text-xs text-gray-400 mt-8">כל המחירים כוללים מע"מ · תשלום חודשי · ביטול בכל עת</p>
       </section>
 
       {/* CTA */}
