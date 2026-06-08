@@ -29,12 +29,21 @@ import TraineeBookSession from './pages/trainee/TraineeBookSession'
 import TraineeChat from './pages/trainee/TraineeChat'
 import TraineeFoodLog from './pages/trainee/TraineeFoodLog'
 import TraineeProgress from './pages/trainee/TraineeProgress'
+import Admin from './pages/Admin'
 
 function PrivateRoute({ children }) {
   const { user } = useAuth()
   if (!user) return <Navigate to="/login" replace />
   if (user.role === 'trainee') return <Navigate to="/trainee" replace />
+  if (user.role === 'admin') return <Navigate to="/admin" replace />
   return <Layout>{children}</Layout>
+}
+
+function AdminRoute({ children }) {
+  const { user } = useAuth()
+  if (!user) return <Navigate to="/login" replace />
+  if (user.role !== 'admin') return <Navigate to="/dashboard" replace />
+  return children
 }
 
 function TraineeRoute({ children }) {
@@ -47,7 +56,9 @@ function TraineeRoute({ children }) {
 function PublicRoute({ children }) {
   const { user } = useAuth()
   if (!user) return children
-  return <Navigate to={user.role === 'trainee' ? '/trainee' : '/dashboard'} replace />
+  if (user.role === 'trainee') return <Navigate to="/trainee" replace />
+  if (user.role === 'admin') return <Navigate to="/admin" replace />
+  return <Navigate to="/dashboard" replace />
 }
 
 export default function App() {
@@ -94,6 +105,9 @@ export default function App() {
             <Route path="/trainee/chat"          element={<TraineeRoute><TraineeChat /></TraineeRoute>} />
             <Route path="/trainee/food-log"      element={<TraineeRoute><TraineeFoodLog /></TraineeRoute>} />
             <Route path="/trainee/progress"      element={<TraineeRoute><TraineeProgress /></TraineeRoute>} />
+
+            {/* Admin */}
+            <Route path="/admin" element={<AdminRoute><Admin /></AdminRoute>} />
 
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>
