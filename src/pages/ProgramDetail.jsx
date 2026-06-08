@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { ArrowLeft, Plus, Edit, Video, Lightbulb, Upload, Trash2, Users, X, BarChart2 } from 'lucide-react'
+import { ArrowLeft, Plus, Edit, Video, Lightbulb, Upload, Trash2, Users, X, BarChart2, Dumbbell, Sparkles } from 'lucide-react'
 import api from '../lib/api'
 import { getMediaUrl } from '../lib/media'
 
@@ -12,8 +12,9 @@ function AddContentModal({ programId, week, onClose, onAdded }) {
   const [videoPreview, setVideoPreview] = useState(null)
   const [videoDuration, setVideoDuration] = useState(null)
   const [uploadProgress, setUploadProgress] = useState(0)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
+  const [loading,    setLoading]    = useState(false)
+  const [aiLoading,  setAiLoading]  = useState(false)
+  const [error,      setError]      = useState('')
 
   const MAX_DURATION = 120 // 2 minutes in seconds
 
@@ -47,7 +48,7 @@ function AddContentModal({ programId, week, onClose, onAdded }) {
       form.append('week', week)
       form.append('contentType', type)
       form.append('title', title)
-      if (type === 'tip') form.append('content', content)
+      if (type === 'tip' || type === 'workout') form.append('content', content)
       if (type === 'video' && file) {
         form.append('video', file)
         if (videoDuration) form.append('videoDuration', videoDuration)
@@ -67,6 +68,17 @@ function AddContentModal({ programId, week, onClose, onAdded }) {
 
   const formatDuration = (sec) => `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`
 
+  const generateWithAI = async () => {
+    if (!title.trim()) return setError('כתוב כותרת קודם כדי שה-AI יידע מה ליצור')
+    setAiLoading(true); setError('')
+    try {
+      const res = await api.post(`/programs/${programId}/ai-generate`, { title, week, contentType: type })
+      setContent(res.data.content)
+    } catch (e) {
+      setError(e.response?.data?.message || 'שגיאה ב-AI — נסה שוב')
+    } finally { setAiLoading(false) }
+  }
+
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl">
@@ -80,10 +92,11 @@ function AddContentModal({ programId, week, onClose, onAdded }) {
         <div className="p-5 space-y-4">
           {error && <p className="text-red-500 text-sm bg-red-50 px-3 py-2 rounded-lg">{error}</p>}
 
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-3 gap-2">
             {[
-              { id: 'video', label: '🎥 סרטון', sub: 'עד 2 דקות' },
-              { id: 'tip', label: '💡 טיפ חכם', sub: 'עצה בטקסט' }
+              { id: 'tip',     label: '💡 טיפ חכם',     sub: 'עצה בטקסט' },
+              { id: 'workout', label: '🏋️ אימון/טיפול',  sub: 'תיאור מפורט' },
+              { id: 'video',   label: '🎥 סרטון',        sub: 'עד 2 דקות' },
             ].map(t => (
               <button key={t.id} onClick={() => { setType(t.id); setError('') }}
                 className={`p-3 rounded-xl border-2 text-right transition-all ${type === t.id ? 'border-[#00969E] bg-[#E6F7F8]' : 'border-gray-100 hover:border-gray-200'}`}>
@@ -97,15 +110,32 @@ function AddContentModal({ programId, week, onClose, onAdded }) {
             <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1.5">כותרת *</label>
             <input value={title} onChange={e => setTitle(e.target.value)}
               className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#00969E]/20 focus:border-[#00969E] transition-all"
-              placeholder={type === 'video' ? 'למשל: יום 1 — חימום' : 'למשל: טיפ לשתייה'} />
+              placeholder={type === 'video' ? 'למשל: יום 1 — חימום' : type === 'workout' ? 'למשל: אימון רגליים — שבוע 1' : 'למשל: טיפ לשתייה'} />
           </div>
 
           {type === 'tip' ? (
             <div>
-              <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1.5">תוכן</label>
+              <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1.5">תוכן הטיפ</label>
               <textarea value={content} onChange={e => setContent(e.target.value)} rows={3}
                 className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#00969E]/20 focus:border-[#00969E] resize-none transition-all"
                 placeholder="כתוב את הטיפ כאן..." />
+            </div>
+          ) : type === 'workout' ? (
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wide">תיאור האימון / הטיפול</label>
+                <button type="button" onClick={generateWithAI} disabled={aiLoading}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white rounded-lg text-xs font-semibold disabled:opacity-60 transition-all shadow-sm shadow-purple-500/20">
+                  {aiLoading
+                    ? <><span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" /> יוצר...</>
+                    : <><Sparkles size={12} /> צור עם AI</>
+                  }
+                </button>
+              </div>
+              <textarea value={content} onChange={e => setContent(e.target.value)} rows={6}
+                className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#00969E]/20 focus:border-[#00969E] resize-none transition-all"
+                placeholder={'למשל:\n• 3 סטים של 12 כפיפות בטן\n• מנוחה 60 שניות בין סטים\n• חימום 5 דקות לפני'} />
+              <p className="text-xs text-gray-400 mt-1.5">כתוב כותרת ולחץ "צור עם AI" לקבלת תיאור מפורט אוטומטי</p>
             </div>
           ) : (
             <div>
@@ -229,11 +259,12 @@ export default function ProgramDetail() {
       </div>
 
       {/* Content stats bar */}
-      <div className="grid grid-cols-3 gap-3 mb-6">
+      <div className="grid grid-cols-4 gap-3 mb-6">
         {[
-          { label: 'Total Items', value: content.length, icon: BarChart2 },
-          { label: 'Videos', value: content.filter(c => c.contentType === 'video').length, icon: Video },
-          { label: 'Tips', value: content.filter(c => c.contentType === 'tip').length, icon: Lightbulb },
+          { label: 'סה״כ פריטים', value: content.length,                                              icon: BarChart2  },
+          { label: 'סרטונים',     value: content.filter(c => c.contentType === 'video').length,   icon: Video      },
+          { label: 'אימונים',     value: content.filter(c => c.contentType === 'workout').length, icon: Dumbbell   },
+          { label: 'טיפים',       value: content.filter(c => c.contentType === 'tip').length,     icon: Lightbulb  },
         ].map(s => (
           <div key={s.label} className="bg-white rounded-xl border border-gray-100 shadow-sm px-4 py-3 flex items-center gap-3">
             <div className="w-8 h-8 bg-gray-50 rounded-lg flex items-center justify-center"><s.icon size={14} className="text-gray-500" /></div>
@@ -300,16 +331,20 @@ export default function ProgramDetail() {
                 {weekContent.map((c, idx) => (
                   <li key={c._id} className="flex items-start gap-4 px-5 py-4 hover:bg-gray-50/50 transition-colors group">
                     <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5 ${
-                      c.contentType === 'video' ? 'bg-blue-50' : 'bg-yellow-50'
+                      c.contentType === 'video' ? 'bg-blue-50' : c.contentType === 'workout' ? 'bg-green-50' : 'bg-yellow-50'
                     }`}>
-                      {c.contentType === 'video' ? <Video size={18} className="text-blue-500" /> : <Lightbulb size={18} className="text-yellow-500" />}
+                      {c.contentType === 'video' ? <Video size={18} className="text-blue-500" /> : c.contentType === 'workout' ? <Dumbbell size={18} className="text-green-500" /> : <Lightbulb size={18} className="text-yellow-500" />}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
                         <span className="text-xs text-gray-400 font-medium">#{idx + 1}</span>
                         <p className="text-sm font-semibold text-gray-900">{c.title}</p>
-                        <span className={`ml-auto text-xs px-2 py-0.5 rounded-full font-medium ${c.contentType === 'video' ? 'bg-blue-50 text-blue-600' : 'bg-yellow-50 text-yellow-600'}`}>
-                          {c.contentType}
+                        <span className={`ml-auto text-xs px-2 py-0.5 rounded-full font-medium ${
+                          c.contentType === 'video' ? 'bg-blue-50 text-blue-600' :
+                          c.contentType === 'workout' ? 'bg-green-50 text-green-600' :
+                          'bg-yellow-50 text-yellow-600'
+                        }`}>
+                          {c.contentType === 'workout' ? 'אימון/טיפול' : c.contentType === 'tip' ? 'טיפ' : 'סרטון'}
                         </span>
                       </div>
                       {c.content && <p className="text-sm text-gray-500 leading-relaxed">{c.content}</p>}
