@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Plus, ChevronRight, ChevronLeft, X, Clock, User, Bell, CheckCircle, Trash2, Hourglass, XCircle, MessageSquare } from 'lucide-react'
+import { useSearchParams } from 'react-router-dom'
 import api from '../lib/api'
 
 const DAYS = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת']
@@ -179,6 +180,8 @@ export default function Calendar() {
   }
 
   const sessionColors = ['bg-[#00969E]', 'bg-purple-500', 'bg-orange-400', 'bg-green-500', 'bg-pink-500']
+  const [searchParams] = useSearchParams()
+  const [calTab, setCalTab] = useState(searchParams.get('tab') === 'requests' ? 'requests' : 'calendar')
 
   return (
     <div className="p-6 max-w-6xl mx-auto">
@@ -191,48 +194,94 @@ export default function Calendar() {
         />
       )}
 
-      {/* Pending requests panel */}
-      {pendingRequests.length > 0 && (
-        <div className="mb-6 bg-yellow-50 border border-yellow-200 rounded-2xl p-4">
-          <h3 className="font-bold text-yellow-800 text-sm mb-3 flex items-center gap-2">
-            <Hourglass size={14} /> {pendingRequests.length} בקשות אימון ממתינות לאישור
-          </h3>
-          <div className="space-y-2">
-            {pendingRequests.map(r => (
-              <div key={r._id} className="bg-white rounded-xl border border-yellow-100 p-3 flex items-center gap-3">
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-gray-900 text-sm">{r.client?.name}</p>
-                  <p className="text-xs text-gray-500 mt-0.5">
-                    📅 {r.preferredDate ? new Date(r.preferredDate + 'T12:00:00').toLocaleDateString('he-IL', { weekday: 'long', day: 'numeric', month: 'long' }) : 'גמיש'}
-                    {r.preferredTime && ` · ${r.preferredTime}`}
-                  </p>
-                  {r.notes && <p className="text-xs text-gray-400 mt-1 italic">"{r.notes}"</p>}
-                </div>
-                <div className="flex gap-2 flex-shrink-0">
-                  <button onClick={() => { setRequestAction({ request: r, type: 'approve' }); setActionForm(f => ({ ...f, time: r.preferredTime || '09:00' })); setTrainerNote('') }}
-                    className="flex items-center gap-1 px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white rounded-lg text-xs font-semibold transition-colors">
-                    <CheckCircle size={12} /> אשר
-                  </button>
-                  <button onClick={() => { setRequestAction({ request: r, type: 'decline' }); setTrainerNote('') }}
-                    className="flex items-center gap-1 px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-500 rounded-lg text-xs font-semibold border border-red-100 transition-colors">
-                    <XCircle size={12} /> דחה
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      <div className="flex items-center justify-between mb-6">
-        <p className="text-sm text-gray-400">{sessions.length} אימונים החודש</p>
-        <button onClick={() => setShowModal(true)}
-          className="flex items-center gap-2 px-5 py-2.5 bg-[#00969E] hover:bg-[#007A81] text-white rounded-xl text-sm font-semibold transition-all shadow-lg shadow-[#00969E]/20">
-          <Plus size={16} /> הוסף אימון
+      {/* Tab toggle */}
+      <div className="flex gap-2 mb-6">
+        <button onClick={() => setCalTab('calendar')}
+          className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all ${calTab === 'calendar' ? 'bg-[#00969E] text-white shadow-lg shadow-[#00969E]/20' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'}`}>
+          <CheckCircle size={15} /> יומן אימונים
+        </button>
+        <button onClick={() => setCalTab('requests')}
+          className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all ${calTab === 'requests' ? 'bg-[#00969E] text-white shadow-lg shadow-[#00969E]/20' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'}`}>
+          <Hourglass size={15} /> בקשות אימון
+          {pendingRequests.length > 0 && (
+            <span className="bg-yellow-400 text-yellow-900 text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+              {pendingRequests.length}
+            </span>
+          )}
         </button>
       </div>
 
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+      {/* ── REQUESTS TAB ── */}
+      {calTab === 'requests' && (
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          <div className="px-5 py-4 border-b border-gray-50 flex items-center justify-between">
+            <h3 className="font-bold text-gray-900 flex items-center gap-2">
+              <Hourglass size={15} className="text-yellow-500" /> בקשות אימון
+            </h3>
+            <span className="text-xs text-gray-400">{requests.length} סה״כ</span>
+          </div>
+
+          {requests.length === 0 ? (
+            <div className="py-16 text-center">
+              <Hourglass size={32} className="mx-auto text-gray-300 mb-3" />
+              <p className="text-gray-400 font-medium">אין בקשות אימון</p>
+              <p className="text-xs text-gray-300 mt-1">בקשות מלקוחות יופיעו כאן</p>
+            </div>
+          ) : (
+            <div className="divide-y divide-gray-50">
+              {requests.map(r => {
+                const isPending = r.status === 'pending'
+                const dateStr = r.preferredDate
+                  ? new Date(r.preferredDate).toLocaleDateString('he-IL', { weekday: 'long', day: 'numeric', month: 'long' })
+                  : 'תאריך גמיש'
+                return (
+                  <div key={r._id} className="p-4 flex items-center gap-4">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <p className="font-semibold text-gray-900 text-sm">{r.client?.name}</p>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                          r.status === 'pending'   ? 'bg-yellow-100 text-yellow-700' :
+                          r.status === 'confirmed' ? 'bg-green-100 text-green-700' :
+                                                     'bg-red-100 text-red-600'
+                        }`}>
+                          {r.status === 'pending' ? 'ממתין' : r.status === 'confirmed' ? 'אושר' : 'נדחה'}
+                        </span>
+                      </div>
+                      <p className="text-xs text-gray-500">📅 {dateStr}{r.preferredTime && ` · ${r.preferredTime}`}</p>
+                      {r.notes && <p className="text-xs text-gray-400 mt-1 italic">"{r.notes}"</p>}
+                      {r.trainerNote && <p className="text-xs text-[#00969E] mt-1">💬 {r.trainerNote}</p>}
+                    </div>
+                    {isPending && (
+                      <div className="flex gap-2 flex-shrink-0">
+                        <button onClick={() => { setRequestAction({ request: r, type: 'approve' }); setActionForm(f => ({ ...f, time: r.preferredTime || '09:00' })); setTrainerNote('') }}
+                          className="flex items-center gap-1 px-3 py-2 bg-green-500 hover:bg-green-600 text-white rounded-xl text-xs font-bold transition-colors shadow-sm shadow-green-500/20">
+                          <CheckCircle size={13} /> אשר
+                        </button>
+                        <button onClick={() => { setRequestAction({ request: r, type: 'decline' }); setTrainerNote('') }}
+                          className="flex items-center gap-1 px-3 py-2 bg-red-50 hover:bg-red-100 text-red-500 rounded-xl text-xs font-bold border border-red-100 transition-colors">
+                          <XCircle size={13} /> דחה
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── CALENDAR TAB ── */}
+      {calTab === 'calendar' && <>
+        <div className="flex items-center justify-between mb-6">
+          <p className="text-sm text-gray-400">{sessions.length} אימונים החודש</p>
+          <button onClick={() => setShowModal(true)}
+            className="flex items-center gap-2 px-5 py-2.5 bg-[#00969E] hover:bg-[#007A81] text-white rounded-xl text-sm font-semibold transition-all shadow-lg shadow-[#00969E]/20">
+            <Plus size={16} /> הוסף אימון
+          </button>
+        </div>
+
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
         <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
           <button onClick={next} className="w-9 h-9 rounded-xl bg-gray-50 hover:bg-gray-100 flex items-center justify-center transition-colors">
             <ChevronRight size={18} className="text-gray-600" />
@@ -276,6 +325,7 @@ export default function Calendar() {
           })}
         </div>
       </div>
+      </>}
 
       {/* Approve / Decline modal */}
       {requestAction && (

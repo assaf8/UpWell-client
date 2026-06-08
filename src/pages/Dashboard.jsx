@@ -102,7 +102,7 @@ export default function Dashboard() {
             </Link>
           )}
           {inbox.pendingRequests > 0 && (
-            <Link to="/calendar"
+            <Link to="/calendar?tab=requests"
               className="flex items-center gap-3 bg-white border border-yellow-100 rounded-2xl px-4 py-3 shadow-sm hover:shadow-md transition-shadow flex-1 min-w-[220px]">
               <div className="w-10 h-10 rounded-xl bg-yellow-50 flex items-center justify-center flex-shrink-0">
                 <Clock size={18} className="text-yellow-600" />
