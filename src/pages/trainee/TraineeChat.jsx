@@ -93,7 +93,7 @@ export default function TraineeChat() {
       const fd = new FormData()
       fd.append('image', imageFile)
       if (text.trim()) fd.append('text', text.trim())
-      const res = await api.post('/trainee/chat', fd, { headers: { 'Content-Type': 'multipart/form-data' } })
+      const res = await api.post('/trainee/chat', fd)
       setMessages(prev => [...prev, res.data])
       setText(''); setImageFile(null); setPreview(null)
     } catch {}
