@@ -1,10 +1,11 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { NavLink, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import {
   LayoutDashboard, Users, Dumbbell, Calendar, Share2,
-  FileText, Settings, LogOut, Menu, X, ChevronLeft, Bell
+  FileText, Settings, LogOut, Menu, X, ChevronLeft, Bell, MessageCircle
 } from 'lucide-react'
+import api from '../lib/api'
 
 const nav = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'לוח בקרה' },
@@ -30,6 +31,16 @@ export default function Layout({ children }) {
   const navigate = useNavigate()
   const location = useLocation()
   const [open, setOpen] = useState(false)
+  const [unread, setUnread] = useState({ unreadMessages: 0, pendingRequests: 0 })
+
+  useEffect(() => {
+    const fetch = () => api.get('/inbox/unread').then(r => setUnread(r.data)).catch(() => {})
+    fetch()
+    const interval = setInterval(fetch, 30000) // refresh every 30s
+    return () => clearInterval(interval)
+  }, [])
+
+  const totalBadge = unread.unreadMessages + unread.pendingRequests
 
   const handleLogout = () => { logout(); navigate('/login') }
   const title = Object.entries(pageTitle).find(([k]) => location.pathname.startsWith(k))?.[1] || ''
@@ -78,6 +89,7 @@ export default function Layout({ children }) {
             </NavLink>
           ))}
 
+
           <div className="pt-4">
             <p className="text-[10px] font-semibold text-white/25 uppercase tracking-widest px-3 mb-3">חשבון</p>
             <NavLink to="/settings" onClick={() => setOpen(false)}
@@ -120,9 +132,13 @@ export default function Layout({ children }) {
             <h1 className="text-lg font-bold text-gray-900">{title}</h1>
           </div>
           <div className="flex items-center gap-2">
-            <button className="relative w-9 h-9 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-100 transition-colors">
+            <button onClick={() => navigate('/clients')} className="relative w-9 h-9 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-100 transition-colors">
               <Bell size={16} />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#00969E] rounded-full ring-2 ring-white" />
+              {totalBadge > 0 && (
+                <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1 ring-2 ring-white">
+                  {totalBadge > 99 ? '99+' : totalBadge}
+                </span>
+              )}
             </button>
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#00969E] to-[#22C55E] flex items-center justify-center text-white font-bold text-sm cursor-pointer shadow-sm" onClick={() => navigate('/settings')}>
               {user?.businessName?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase()}

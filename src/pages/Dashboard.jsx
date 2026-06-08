@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Users, Dumbbell, Calendar, TrendingUp, ArrowLeft, Plus, ArrowUpRight } from 'lucide-react'
+import { Users, Dumbbell, Calendar, TrendingUp, ArrowLeft, Plus, ArrowUpRight, MessageCircle, Clock, Bell } from 'lucide-react'
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar, CartesianGrid } from 'recharts'
 import api from '../lib/api'
 import { useAuth } from '../contexts/AuthContext'
@@ -52,10 +52,12 @@ export default function Dashboard() {
   const { user } = useAuth()
   const [stats, setStats] = useState(null)
   const [recentClients, setRecentClients] = useState([])
+  const [inbox, setInbox] = useState({ unreadMessages: 0, pendingRequests: 0 })
 
   useEffect(() => {
     api.get('/dashboard/stats').then(r => setStats(r.data)).catch(() => {})
     api.get('/clients?limit=5').then(r => setRecentClients(r.data.clients || [])).catch(() => {})
+    api.get('/inbox/unread').then(r => setInbox(r.data)).catch(() => {})
   }, [])
 
   const greeting = () => {
@@ -80,6 +82,42 @@ export default function Dashboard() {
           {new Date().toLocaleDateString('he-IL', { weekday: 'long', month: 'long', day: 'numeric' })}
         </div>
       </div>
+
+      {/* Notifications */}
+      {(inbox.unreadMessages > 0 || inbox.pendingRequests > 0) && (
+        <div className="flex flex-wrap gap-3">
+          {inbox.unreadMessages > 0 && (
+            <Link to="/clients"
+              className="flex items-center gap-3 bg-white border border-red-100 rounded-2xl px-4 py-3 shadow-sm hover:shadow-md transition-shadow flex-1 min-w-[220px]">
+              <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center flex-shrink-0">
+                <MessageCircle size={18} className="text-red-500" />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-gray-900">הודעות שלא נקראו</p>
+                <p className="text-xs text-gray-400">{inbox.unreadMessages} הודעות מלקוחות ממתינות לתשובה</p>
+              </div>
+              <span className="mr-auto bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0">
+                {inbox.unreadMessages}
+              </span>
+            </Link>
+          )}
+          {inbox.pendingRequests > 0 && (
+            <Link to="/calendar"
+              className="flex items-center gap-3 bg-white border border-yellow-100 rounded-2xl px-4 py-3 shadow-sm hover:shadow-md transition-shadow flex-1 min-w-[220px]">
+              <div className="w-10 h-10 rounded-xl bg-yellow-50 flex items-center justify-center flex-shrink-0">
+                <Clock size={18} className="text-yellow-600" />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-gray-900">בקשות אימון חדשות</p>
+                <p className="text-xs text-gray-400">{inbox.pendingRequests} בקשות ממתינות לאישור</p>
+              </div>
+              <span className="mr-auto bg-yellow-400 text-yellow-900 text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0">
+                {inbox.pendingRequests}
+              </span>
+            </Link>
+          )}
+        </div>
+      )}
 
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">

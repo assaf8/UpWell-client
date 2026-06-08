@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router-dom'
 import { Home, MessageCircle, Calendar, Camera, TrendingUp } from 'lucide-react'
 
-export default function TraineeNav({ unread = 0, hasDiet = false }) {
+export default function TraineeNav({ unread = 0, hasDiet = false, hasSession = false }) {
   const base     = 'flex flex-col items-center gap-1 py-2 px-3 text-xs font-medium transition-colors'
   const active   = 'text-[#00969E]'
   const inactive = 'text-gray-400'
@@ -15,8 +15,13 @@ export default function TraineeNav({ unread = 0, hasDiet = false }) {
         </NavLink>
 
         <NavLink to="/trainee/book" className={({ isActive }) => `${base} ${isActive ? active : inactive}`}>
-          <Calendar size={20} />
-          <span>הזמן</span>
+          <div className="relative">
+            <Calendar size={20} />
+            {hasSession && (
+              <span className="absolute -top-1.5 -right-1.5 w-2.5 h-2.5 bg-green-500 rounded-full ring-2 ring-white" />
+            )}
+          </div>
+          <span>יומן</span>
         </NavLink>
 
         <NavLink to="/trainee/chat" className={({ isActive }) => `${base} ${isActive ? active : inactive}`}>

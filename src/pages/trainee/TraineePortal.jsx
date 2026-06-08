@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
-import { LogOut, Dumbbell, Apple, HeartPulse, ChevronLeft, TrendingUp, CheckCircle, Play } from 'lucide-react'
+import { LogOut, Dumbbell, Apple, HeartPulse, ChevronLeft, TrendingUp, CheckCircle, Play, MessageCircle, Calendar, Clock } from 'lucide-react'
 import api from '../../lib/api'
 import TraineeNav from './TraineeNav'
+
+const MONTHS = ['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר']
 
 const typeConfig = {
   workout: { label: 'אימון', icon: Dumbbell, gradient: 'from-blue-500 to-blue-700', light: 'bg-blue-50 text-blue-600' },
@@ -97,6 +99,61 @@ export default function TraineePortal() {
 
       {/* Programs list - overlaps hero */}
       <div className="px-4 -mt-16 relative z-10 pb-24 max-w-lg mx-auto">
+
+        {/* ── Notification Cards ── */}
+        {(data?.unreadCount > 0 || data?.nextSession || data?.pendingRequestsCount > 0) && (
+          <div className="space-y-2 mb-4">
+            {data?.unreadCount > 0 && (
+              <Link to="/trainee/chat"
+                className="flex items-center gap-3 bg-white rounded-2xl shadow-lg px-4 py-3 border-r-4 border-[#00969E] hover:shadow-xl transition-shadow">
+                <div className="w-9 h-9 rounded-xl bg-[#E6F7F8] flex items-center justify-center flex-shrink-0">
+                  <MessageCircle size={17} className="text-[#00969E]" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-bold text-gray-900">הודעה חדשה מהמאמן</p>
+                  <p className="text-xs text-gray-400">{data.unreadCount} הודעות שלא נקראו</p>
+                </div>
+                <span className="w-6 h-6 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center flex-shrink-0">
+                  {data.unreadCount > 9 ? '9+' : data.unreadCount}
+                </span>
+              </Link>
+            )}
+
+            {data?.nextSession && (
+              <Link to="/trainee/book"
+                className="flex items-center gap-3 bg-white rounded-2xl shadow-lg px-4 py-3 border-r-4 border-green-500 hover:shadow-xl transition-shadow">
+                <div className="w-9 h-9 rounded-xl bg-green-50 flex items-center justify-center flex-shrink-0">
+                  <Calendar size={17} className="text-green-600" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-bold text-gray-900">אימון קרוב</p>
+                  <p className="text-xs text-gray-400">
+                    {new Date(data.nextSession.date).toLocaleDateString('he-IL', { weekday: 'long', day: 'numeric', month: 'long' })}
+                    {data.nextSession.time && ` · ${data.nextSession.time}`}
+                  </p>
+                </div>
+                <div className="text-center flex-shrink-0">
+                  <p className="text-lg font-black text-green-600 leading-none">{new Date(data.nextSession.date).getDate()}</p>
+                  <p className="text-[10px] text-green-500">{MONTHS[new Date(data.nextSession.date).getMonth()].slice(0,3)}</p>
+                </div>
+              </Link>
+            )}
+
+            {data?.pendingRequestsCount > 0 && (
+              <Link to="/trainee/book"
+                className="flex items-center gap-3 bg-white rounded-2xl shadow-lg px-4 py-3 border-r-4 border-yellow-400 hover:shadow-xl transition-shadow">
+                <div className="w-9 h-9 rounded-xl bg-yellow-50 flex items-center justify-center flex-shrink-0">
+                  <Clock size={17} className="text-yellow-600" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-bold text-gray-900">בקשת אימון ממתינה</p>
+                  <p className="text-xs text-gray-400">המאמן טרם אישר את הבקשה</p>
+                </div>
+              </Link>
+            )}
+          </div>
+        )}
+
         <h2 className="text-base font-bold text-white mb-3 px-1">התוכניות שלי</h2>
 
         {activePrograms.length === 0 ? (
@@ -186,7 +243,7 @@ export default function TraineePortal() {
         </div>
       </div>
 
-      <TraineeNav unread={data?.unreadCount || 0} hasDiet={hasDiet} />
+      <TraineeNav unread={data?.unreadCount || 0} hasDiet={hasDiet} hasSession={!!data?.nextSession} />
     </div>
   )
 }
