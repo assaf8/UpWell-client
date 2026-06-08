@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Plus, ChevronRight, ChevronLeft, X, Clock, User, Bell, CheckCircle, Trash2 } from 'lucide-react'
+import { Plus, ChevronRight, ChevronLeft, X, Clock, User, Bell, CheckCircle, Trash2, Hourglass, XCircle, MessageSquare } from 'lucide-react'
 import api from '../lib/api'
 
 const DAYS = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת']
@@ -95,11 +95,22 @@ export default function Calendar() {
   const [clients, setClients] = useState([])
   const [form, setForm] = useState({ clientId: '', date: '', time: '09:00', duration: 60, price: '' })
   const [saving, setSaving] = useState(false)
+  const [requests, setRequests] = useState([])
+  const [requestAction, setRequestAction] = useState(null) // { request, type: 'approve'|'decline' }
+  const [trainerNote, setTrainerNote] = useState('')
+  const [actionForm, setActionForm] = useState({ time: '09:00', duration: 60, price: '' })
+  const [actioning, setActioning] = useState(false)
 
   useEffect(() => {
     api.get(`/sessions?year=${year}&month=${month + 1}`).then(r => setSessions(r.data || [])).catch(() => {})
     api.get('/clients').then(r => setClients(r.data.clients || [])).catch(() => {})
   }, [year, month])
+
+  useEffect(() => {
+    api.get('/inbox/session-requests').then(r => setRequests(r.data || [])).catch(() => {})
+  }, [])
+
+  const pendingRequests = requests.filter(r => r.status === 'pending')
 
   const prev = () => { if (month === 0) { setMonth(11); setYear(y => y - 1) } else setMonth(m => m - 1) }
   const next = () => { if (month === 11) { setMonth(0); setYear(y => y + 1) } else setMonth(m => m + 1) }
@@ -135,6 +146,38 @@ export default function Calendar() {
     setSessions(prev => prev.map(s => s._id === id ? { ...s, reminderSent: true, reminderChannel: channel } : s))
   }
 
+  const approveRequest = async () => {
+    const r = requestAction.request
+    setActioning(true)
+    try {
+      // 1. Mark request as confirmed
+      await api.put(`/inbox/session-requests/${r._id}`, { status: 'confirmed', trainerNote })
+      // 2. Create actual session on the calendar
+      const session = await api.post('/sessions', {
+        clientId: r.client._id,
+        date: r.preferredDate,
+        time: actionForm.time || r.preferredTime,
+        duration: actionForm.duration,
+        price: actionForm.price || undefined,
+      })
+      setSessions(prev => [...prev, session.data])
+      setRequests(prev => prev.map(x => x._id === r._id ? { ...x, status: 'confirmed' } : x))
+      setRequestAction(null); setTrainerNote(''); setActionForm({ time: '09:00', duration: 60, price: '' })
+    } catch (e) { alert(e.response?.data?.message || 'שגיאה') }
+    finally { setActioning(false) }
+  }
+
+  const declineRequest = async () => {
+    const r = requestAction.request
+    setActioning(true)
+    try {
+      await api.put(`/inbox/session-requests/${r._id}`, { status: 'declined', trainerNote })
+      setRequests(prev => prev.map(x => x._id === r._id ? { ...x, status: 'declined' } : x))
+      setRequestAction(null); setTrainerNote('')
+    } catch {}
+    finally { setActioning(false) }
+  }
+
   const sessionColors = ['bg-[#00969E]', 'bg-purple-500', 'bg-orange-400', 'bg-green-500', 'bg-pink-500']
 
   return (
@@ -146,6 +189,39 @@ export default function Calendar() {
           onDelete={deleteSession}
           onRemind={sendReminder}
         />
+      )}
+
+      {/* Pending requests panel */}
+      {pendingRequests.length > 0 && (
+        <div className="mb-6 bg-yellow-50 border border-yellow-200 rounded-2xl p-4">
+          <h3 className="font-bold text-yellow-800 text-sm mb-3 flex items-center gap-2">
+            <Hourglass size={14} /> {pendingRequests.length} בקשות אימון ממתינות לאישור
+          </h3>
+          <div className="space-y-2">
+            {pendingRequests.map(r => (
+              <div key={r._id} className="bg-white rounded-xl border border-yellow-100 p-3 flex items-center gap-3">
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-gray-900 text-sm">{r.client?.name}</p>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    📅 {r.preferredDate ? new Date(r.preferredDate + 'T12:00:00').toLocaleDateString('he-IL', { weekday: 'long', day: 'numeric', month: 'long' }) : 'גמיש'}
+                    {r.preferredTime && ` · ${r.preferredTime}`}
+                  </p>
+                  {r.notes && <p className="text-xs text-gray-400 mt-1 italic">"{r.notes}"</p>}
+                </div>
+                <div className="flex gap-2 flex-shrink-0">
+                  <button onClick={() => { setRequestAction({ request: r, type: 'approve' }); setActionForm(f => ({ ...f, time: r.preferredTime || '09:00' })); setTrainerNote('') }}
+                    className="flex items-center gap-1 px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white rounded-lg text-xs font-semibold transition-colors">
+                    <CheckCircle size={12} /> אשר
+                  </button>
+                  <button onClick={() => { setRequestAction({ request: r, type: 'decline' }); setTrainerNote('') }}
+                    className="flex items-center gap-1 px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-500 rounded-lg text-xs font-semibold border border-red-100 transition-colors">
+                    <XCircle size={12} /> דחה
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       )}
 
       <div className="flex items-center justify-between mb-6">
@@ -200,6 +276,78 @@ export default function Calendar() {
           })}
         </div>
       </div>
+
+      {/* Approve / Decline modal */}
+      {requestAction && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl">
+            <div className="flex items-center justify-between p-5 border-b border-gray-100">
+              <h2 className="font-bold text-gray-900">
+                {requestAction.type === 'approve' ? '✅ אישור בקשת אימון' : '❌ דחיית בקשה'}
+              </h2>
+              <button onClick={() => setRequestAction(null)} className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center hover:bg-gray-200"><X size={15} /></button>
+            </div>
+            <div className="p-5 space-y-4">
+              <div className="bg-gray-50 rounded-xl p-3 text-sm">
+                <p className="font-semibold text-gray-900">{requestAction.request.client?.name}</p>
+                <p className="text-gray-500 text-xs mt-0.5">
+                  {requestAction.request.preferredDate
+                    ? new Date(requestAction.request.preferredDate + 'T12:00:00').toLocaleDateString('he-IL', { weekday: 'long', day: 'numeric', month: 'long' })
+                    : 'תאריך גמיש'}
+                  {requestAction.request.preferredTime && ` · ${requestAction.request.preferredTime}`}
+                </p>
+                {requestAction.request.notes && <p className="text-xs text-gray-400 mt-1 italic">"{requestAction.request.notes}"</p>}
+              </div>
+
+              {requestAction.type === 'approve' && (
+                <div className="space-y-3">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-600 mb-1.5 flex items-center gap-1"><Clock size={11} /> שעה</label>
+                      <input type="time" value={actionForm.time} onChange={e => setActionForm(f => ({...f, time: e.target.value}))} dir="ltr"
+                        className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#00969E]/20 focus:border-[#00969E]" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-600 mb-1.5">משך (דק׳)</label>
+                      <select value={actionForm.duration} onChange={e => setActionForm(f => ({...f, duration: e.target.value}))}
+                        className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#00969E]/20 focus:border-[#00969E] bg-white">
+                        {[30,45,60,90,120].map(d => <option key={d} value={d}>{d} דק׳</option>)}
+                      </select>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-600 mb-1.5">מחיר (₪) — אופציונלי</label>
+                    <input type="number" value={actionForm.price} onChange={e => setActionForm(f => ({...f, price: e.target.value}))} placeholder="0" dir="ltr"
+                      className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#00969E]/20 focus:border-[#00969E]" />
+                  </div>
+                </div>
+              )}
+
+              <div>
+                <label className="block text-xs font-semibold text-gray-600 mb-1.5 flex items-center gap-1"><MessageSquare size={11} /> הודעה ללקוח (אופציונלי)</label>
+                <textarea value={trainerNote} onChange={e => setTrainerNote(e.target.value)} rows={2}
+                  placeholder={requestAction.type === 'approve' ? 'למשל: מחכה לך! הכנס בכניסה הראשית.' : 'למשל: אנא בחר תאריך אחר.'}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#00969E]/20 focus:border-[#00969E] resize-none" />
+              </div>
+
+              <div className="flex gap-2">
+                {requestAction.type === 'approve' ? (
+                  <button onClick={approveRequest} disabled={actioning}
+                    className="flex-1 py-2.5 bg-green-500 hover:bg-green-600 text-white rounded-xl text-sm font-bold transition-all disabled:opacity-60">
+                    {actioning ? 'מאשר...' : '✅ אשר ותזמן אימון'}
+                  </button>
+                ) : (
+                  <button onClick={declineRequest} disabled={actioning}
+                    className="flex-1 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl text-sm font-bold transition-all disabled:opacity-60">
+                    {actioning ? 'שולח...' : '❌ דחה בקשה'}
+                  </button>
+                )}
+                <button onClick={() => setRequestAction(null)} className="px-5 py-2.5 bg-gray-100 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-200">ביטול</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {showModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
