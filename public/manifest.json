@@ -2,26 +2,45 @@
   "name": "UpWell — ניהול עסק הכושר",
   "short_name": "UpWell",
   "description": "מערכת הניהול לאנשי מקצוע בתחום הבריאות והוולנס",
-  "start_url": "/",
+  "start_url": "/dashboard",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#00969E",
-  "orientation": "portrait",
+  "orientation": "portrait-primary",
   "lang": "he",
   "dir": "rtl",
   "icons": [
     {
-      "src": "/icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
       "purpose": "any maskable"
     }
   ],
-  "categories": ["health", "fitness", "business", "productivity"]
+  "shortcuts": [
+    {
+      "name": "לקוחות",
+      "short_name": "לקוחות",
+      "description": "ניהול לקוחות",
+      "url": "/clients",
+      "icons": [{ "src": "/icon.svg", "sizes": "any" }]
+    },
+    {
+      "name": "יומן",
+      "short_name": "יומן",
+      "description": "יומן אימונים",
+      "url": "/calendar",
+      "icons": [{ "src": "/icon.svg", "sizes": "any" }]
+    },
+    {
+      "name": "לידים",
+      "short_name": "לידים",
+      "description": "ניהול לידים",
+      "url": "/leads",
+      "icons": [{ "src": "/icon.svg", "sizes": "any" }]
+    }
+  ],
+  "categories": ["health", "fitness", "business", "productivity"],
+  "prefer_related_applications": false
 }

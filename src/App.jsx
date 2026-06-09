@@ -32,6 +32,7 @@ import TraineeProgress from './pages/trainee/TraineeProgress'
 import Admin from './pages/Admin'
 import Billing from './pages/Billing'
 import Leads from './pages/Leads'
+import InstallPrompt from './components/InstallPrompt'
 
 function PrivateRoute({ children }) {
   const { user } = useAuth()
@@ -66,6 +67,7 @@ function PublicRoute({ children }) {
 export default function App() {
   return (
     <>
+    <InstallPrompt />
     <BrowserRouter>
       <AuthProvider>
         <SocketProvider>
