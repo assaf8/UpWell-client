@@ -68,15 +68,15 @@ export default function Login() {
           </p>
         </div>
 
-        <div className="relative z-10 grid grid-cols-3 gap-4" aria-label="נתוני פלטפורמה">
+        <div className="relative z-10 flex flex-col gap-3">
           {[
-            { value: '2,400+', label: 'מאמנים פעילים' },
-            { value: '18K+',   label: 'תוכניות נוצרו'  },
-            { value: '94%',    label: 'שימור לקוחות'   },
+            { icon: '🔒', text: 'SSL מאובטח — הנתונים שלך מוצפנים' },
+            { icon: '🇮🇱', text: 'שרתים בישראל — עמידה בתקנות הגנת הפרטיות' },
+            { icon: '✅', text: 'חודש ניסיון חינם — ללא כרטיס אשראי' },
           ].map(s => (
-            <div key={s.label} className="bg-white/10 backdrop-blur rounded-xl p-4">
-              <p className="text-white font-bold text-xl">{s.value}</p>
-              <p className="text-white/60 text-xs mt-0.5">{s.label}</p>
+            <div key={s.text} className="flex items-center gap-3 bg-white/10 backdrop-blur rounded-xl px-4 py-3">
+              <span className="text-lg">{s.icon}</span>
+              <p className="text-white/80 text-sm">{s.text}</p>
             </div>
           ))}
         </div>
