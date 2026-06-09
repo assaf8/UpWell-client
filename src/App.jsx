@@ -33,6 +33,7 @@ import Admin from './pages/Admin'
 import Billing from './pages/Billing'
 import Leads from './pages/Leads'
 import InstallPrompt from './components/InstallPrompt'
+import AccessibilityWidget from './components/AccessibilityWidget'
 
 function PrivateRoute({ children }) {
   const { user } = useAuth()
@@ -68,6 +69,7 @@ export default function App() {
   return (
     <>
     <InstallPrompt />
+    <AccessibilityWidget />
     <BrowserRouter>
       <AuthProvider>
         <SocketProvider>
