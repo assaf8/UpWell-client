@@ -442,9 +442,16 @@ export default function Calendar() {
                 </div>
               </div>
             </div>
+            <div className="px-5 pb-1">
+              {(!form.clientId || !form.date) && (
+                <p className="text-xs text-red-500 text-right">
+                  {!form.clientId && !form.date ? 'נא לבחור לקוח ותאריך' : !form.clientId ? 'נא לבחור לקוח' : 'נא לבחור תאריך'}
+                </p>
+              )}
+            </div>
             <div className="flex gap-2 p-5 border-t border-gray-100">
               <button onClick={save} disabled={saving || !form.clientId || !form.date}
-                className="flex-1 py-2.5 bg-[#00969E] hover:bg-[#007A81] text-white rounded-xl text-sm font-semibold transition-all shadow-lg shadow-[#00969E]/20 disabled:opacity-50">
+                className="flex-1 py-2.5 bg-[#00969E] hover:bg-[#007A81] text-white rounded-xl text-sm font-semibold transition-all shadow-lg shadow-[#00969E]/20 disabled:opacity-50 disabled:cursor-not-allowed">
                 {saving ? 'שומר...' : 'שמור אימון'}
               </button>
               <button onClick={() => setShowModal(false)} className="px-5 py-2.5 bg-gray-100 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-200">ביטול</button>

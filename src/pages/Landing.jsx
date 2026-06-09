@@ -11,10 +11,10 @@ const FEATURES = [
 ]
 
 const STATS = [
-  { value: '2,400+', label: 'מאמנים פעילים' },
-  { value: '18K+',   label: 'תוכניות נוצרו'  },
-  { value: '94%',    label: 'שימור לקוחות'   },
-  { value: 'חינם',   label: 'חודש ניסיון'    },
+  { value: 'חינם', label: 'חודש ניסיון ראשון' },
+  { value: '₪49',  label: 'Starter לחודש' },
+  { value: '₪199', label: 'Pro לחודש' },
+  { value: '₪349', label: 'Studio לחודש' },
 ]
 
 const PRICING = [
@@ -108,10 +108,10 @@ function DashboardMockup() {
           {/* Stat cards */}
           <div className="grid grid-cols-4 gap-2 mb-4">
             {[
-              { icon: '👥', val: '47',  label: 'לקוחות', color: 'bg-teal-50' },
-              { icon: '🏋️', val: '12',  label: 'תוכניות', color: 'bg-purple-50' },
-              { icon: '📅', val: '28',  label: 'אימונים', color: 'bg-orange-50' },
-              { icon: '📈', val: '94%', label: 'שימור', color: 'bg-green-50' },
+              { icon: '👥', val: '—',  label: 'לקוחות', color: 'bg-teal-50' },
+              { icon: '🏋️', val: '—',  label: 'תוכניות', color: 'bg-purple-50' },
+              { icon: '📅', val: '—',  label: 'אימונים', color: 'bg-orange-50' },
+              { icon: '📈', val: '—',  label: 'הכנסות', color: 'bg-green-50' },
             ].map(s => (
               <div key={s.label} className={`${s.color} rounded-xl p-2.5 text-center`}>
                 <p className="text-base">{s.icon}</p>
@@ -163,11 +163,11 @@ function DashboardMockup() {
         </div>
       </div>
 
-      {/* Floating revenue card */}
+      {/* Floating card */}
       <div className="absolute -top-5 -right-6 bg-gradient-to-br from-[#00969E] to-[#005f66] rounded-2xl shadow-xl p-3 text-white w-36">
-        <p className="text-[9px] text-white/70 mb-0.5">הכנסה החודש</p>
-        <p className="font-black text-lg">₪8,900</p>
-        <p className="text-[9px] text-green-300 flex items-center gap-1">▲ 18% מהחודש שעבר</p>
+        <p className="text-[9px] text-white/70 mb-0.5">לוח הבקרה שלך</p>
+        <p className="font-black text-sm">הכל במקום אחד</p>
+        <p className="text-[9px] text-green-300 mt-0.5">לקוחות · יומן · צ׳אט</p>
       </div>
     </div>
   )
@@ -281,7 +281,7 @@ export default function Landing() {
             <div>
               <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur px-4 py-1.5 rounded-full text-sm font-medium mb-6">
                 <Zap size={14} className="text-yellow-300" />
-                פלטפורמה מספר 1 לאנשי וולנס בישראל
+                פלטפורמה לאנשי וולנס בישראל
               </div>
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-black leading-tight mb-6">
                 UpWell.<br />
@@ -301,18 +301,17 @@ export default function Landing() {
                   כניסה לחשבון קיים
                 </Link>
               </div>
-              {/* Social proof avatars */}
-              <div className="flex items-center gap-3">
-                <div className="flex -space-x-2 rtl:space-x-reverse">
-                  {['Y','R','M','S','D'].map((l,i) => (
-                    <div key={i} className="w-8 h-8 rounded-full border-2 border-white bg-gradient-to-br from-[#00969E] to-green-500 flex items-center justify-center text-white text-xs font-bold">
-                      {l}
-                    </div>
-                  ))}
+              {/* Trust badges */}
+              <div className="flex items-center gap-4 flex-wrap">
+                <div className="flex items-center gap-2 bg-white/15 backdrop-blur px-3 py-1.5 rounded-full text-xs text-white/90">
+                  <span>🔒</span> SSL מאובטח
                 </div>
-                <p className="text-sm text-white/80">
-                  <strong className="text-white">2,400+</strong> מאמנים פעילים
-                </p>
+                <div className="flex items-center gap-2 bg-white/15 backdrop-blur px-3 py-1.5 rounded-full text-xs text-white/90">
+                  <span>🇮🇱</span> שרתים בישראל
+                </div>
+                <div className="flex items-center gap-2 bg-white/15 backdrop-blur px-3 py-1.5 rounded-full text-xs text-white/90">
+                  <span>✅</span> ללא כרטיס אשראי
+                </div>
               </div>
             </div>
 
@@ -538,45 +537,11 @@ export default function Landing() {
         <p className="text-center text-xs text-gray-400 mt-8">כל המחירים כוללים מע"מ · תשלום חודשי · ביטול בכל עת</p>
       </section>
 
-      {/* ── Testimonials ── */}
-      <section className="bg-gray-50 py-20">
-        <div className="max-w-5xl mx-auto px-6">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-black text-gray-900 mb-3">מה המאמנים אומרים</h2>
-          </div>
-          <div className="grid md:grid-cols-3 gap-6">
-            {[
-              { name: 'יוני כהן', role: 'מאמן כושר אישי', stars: 5, text: 'חסכתי 3 שעות שבועיות על ניהול. הלקוחות שלי מאושרים יותר כי הם רואים את ההתקדמות שלהם.' },
-              { name: 'דנה לוי', role: 'תזונאית קלינית', stars: 5, text: 'יומן האוכל עם AI הוא פשוט קסם. הלקוחות מצלמים ומקבלים ניתוח מיידי — זה שינה את המשחק.' },
-              { name: 'אלון שפירא', role: 'בעל סטודיו כושר', stars: 5, text: 'ניהול 40+ לקוחות עם UpWell זה יותר קל מלנהל 10 לקוחות עם Excel. ממליץ בחום.' },
-            ].map(t => (
-              <div key={t.name} className="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm hover:shadow-md transition-shadow">
-                <div className="flex gap-0.5 mb-4">
-                  {Array.from({length: t.stars}).map((_, i) => (
-                    <span key={i} className="text-yellow-400 text-sm">★</span>
-                  ))}
-                </div>
-                <p className="text-gray-700 text-sm leading-relaxed mb-5">"{t.text}"</p>
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#00969E] to-green-500 flex items-center justify-center text-white font-bold text-sm">
-                    {t.name[0]}
-                  </div>
-                  <div>
-                    <p className="text-sm font-bold text-gray-900">{t.name}</p>
-                    <p className="text-xs text-gray-400">{t.role}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* CTA */}
       <section className="bg-gradient-to-br from-[#00969E] to-[#005f66] py-20">
         <div className="max-w-2xl mx-auto px-6 text-center text-white">
           <h2 className="text-3xl font-black mb-4">מוכן לקחת את העסק לרמה הבאה?</h2>
-          <p className="text-white/70 text-lg mb-8">הצטרף לאלפי מאמנים שכבר עובדים חכם יותר עם UpWell.</p>
+          <p className="text-white/70 text-lg mb-8">התחל לנהל את העסק שלך בצורה חכמה יותר עם UpWell.</p>
           <Link to="/signup"
             className="inline-block px-10 py-4 bg-white text-[#00969E] rounded-2xl font-black text-base hover:bg-gray-50 transition-all shadow-2xl">
             התחל בחינם — ללא כרטיס אשראי

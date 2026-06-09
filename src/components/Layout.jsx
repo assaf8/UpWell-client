@@ -7,6 +7,7 @@ import {
   Target, AlertCircle, CreditCard
 } from 'lucide-react'
 import api from '../lib/api'
+import OnboardingBot from './OnboardingBot'
 
 const nav = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'לוח בקרה' },
@@ -183,6 +184,7 @@ export default function Layout({ children }) {
         <main className="flex-1 overflow-y-auto">
           {children}
         </main>
+        <OnboardingBot />
       </div>
     </div>
   )
