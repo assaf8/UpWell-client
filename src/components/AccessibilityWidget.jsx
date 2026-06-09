@@ -67,6 +67,7 @@ function injectStyles() {
 
 export default function AccessibilityWidget() {
   const [open, setOpen] = useState(false)
+  const [hidden, setHidden] = useState(() => !!localStorage.getItem('a11y-hidden'))
   const [prefs, setPrefs] = useState(loadPrefs)
   const panelRef = useRef()
   const [readingLineY, setReadingLineY] = useState(200)
@@ -105,6 +106,14 @@ export default function AccessibilityWidget() {
 
   const isModified = JSON.stringify(prefs) !== JSON.stringify(DEFAULTS)
 
+  if (hidden) return null
+
+  const hideWidget = () => {
+    setHidden(true)
+    setOpen(false)
+    localStorage.setItem('a11y-hidden', '1')
+  }
+
   return (
     <>
       {/* Reading line */}
@@ -113,12 +122,22 @@ export default function AccessibilityWidget() {
           style={{ top: readingLineY - 16, background: 'rgba(0,150,158,0.15)', borderTop: '2px solid #00969E', borderBottom: '2px solid #00969E' }} />
       )}
 
-      {/* Floating button */}
+      {/* Floating button + dismiss X */}
+      <div className="fixed bottom-6 left-6 z-[9999] flex flex-col items-center gap-1 group">
+        {/* X dismiss button — visible on hover */}
+        <button
+          onClick={hideWidget}
+          aria-label="הסתר כפתור נגישות"
+          className="w-5 h-5 rounded-full bg-gray-400 hover:bg-red-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 shadow-md"
+        >
+          <X size={11} />
+        </button>
+
       <button
         onClick={() => setOpen(o => !o)}
         aria-label="פתח תפריט נגישות"
         aria-expanded={open}
-        className="fixed bottom-6 left-6 z-[9999] w-14 h-14 rounded-full shadow-2xl flex items-center justify-center transition-all focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#00969E]"
+        className="w-14 h-14 rounded-full shadow-2xl flex items-center justify-center transition-all focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#00969E]"
         style={{ background: 'linear-gradient(135deg, #1a2a4a 0%, #0D1F3C 100%)' }}
       >
         {/* Wheelchair / accessibility SVG icon */}
@@ -131,6 +150,7 @@ export default function AccessibilityWidget() {
           <span className="absolute -top-1 -right-1 w-4 h-4 bg-[#00969E] rounded-full ring-2 ring-white" aria-hidden="true" />
         )}
       </button>
+      </div>{/* end floating wrapper */}
 
       {/* Panel */}
       {open && (
