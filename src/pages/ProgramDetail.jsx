@@ -231,7 +231,7 @@ export default function ProgramDetail() {
   }, [id])
 
   const deleteContent = async (cid) => {
-    if (!confirm('Delete this content?')) return
+    if (!confirm('למחוק תוכן זה?')) return
     await api.delete(`/programs/${id}/content/${cid}`)
     setContent(prev => prev.filter(c => c._id !== cid))
   }
@@ -256,7 +256,7 @@ export default function ProgramDetail() {
             <h2 className="font-bold text-gray-900">{program.title}</h2>
             <div className="flex items-center gap-2 mt-0.5">
               <span className={`text-xs px-2 py-0.5 rounded-full bg-gradient-to-r ${typeGradient[program.type]} text-white font-medium capitalize`}>{program.type}</span>
-              <span className="text-xs text-gray-400">{program.duration} weeks · {program.level}</span>
+              <span className="text-xs text-gray-400">{program.duration} שבועות · {program.level}</span>
             </div>
           </div>
         </div>
@@ -298,7 +298,7 @@ export default function ProgramDetail() {
         {/* Week nav */}
         <div className="lg:col-span-1">
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-3 sticky top-4">
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 px-2">Weeks</p>
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 px-2">שבועות</p>
             <div className="space-y-1">
               {weeks.map(w => {
                 const cnt = content.filter(c => c.week === w).length
@@ -308,7 +308,7 @@ export default function ProgramDetail() {
                     className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm transition-all ${
                       isActive ? 'bg-[#00969E] text-white shadow-md shadow-[#00969E]/20' : 'text-gray-600 hover:bg-gray-50'
                     }`}>
-                    <span className={`font-medium ${isActive ? 'text-white' : ''}`}>Week {w}</span>
+                    <span className={`font-medium ${isActive ? 'text-white' : ''}`}>שבוע {w}</span>
                     {cnt > 0 && (
                       <span className={`text-xs px-1.5 py-0.5 rounded-full font-medium ${isActive ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-500'}`}>
                         {cnt}
@@ -326,12 +326,12 @@ export default function ProgramDetail() {
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm">
             <div className="flex items-center justify-between px-5 py-4 border-b border-gray-50">
               <div>
-                <h3 className="font-bold text-gray-900">Week {activeWeek}</h3>
-                <p className="text-xs text-gray-400 mt-0.5">{weekContent.length} items</p>
+                <h3 className="font-bold text-gray-900">שבוע {activeWeek}</h3>
+                <p className="text-xs text-gray-400 mt-0.5">{weekContent.length} פריטים</p>
               </div>
               <button onClick={() => setModal({ week: activeWeek })}
                 className="flex items-center gap-2 px-4 py-2 bg-[#00969E] hover:bg-[#007A81] text-white rounded-xl text-sm font-semibold transition-all shadow-sm">
-                <Plus size={14} /> Add Content
+                <Plus size={14} /> הוסף תוכן
               </button>
             </div>
 
@@ -340,11 +340,11 @@ export default function ProgramDetail() {
                 <div className="w-14 h-14 bg-gray-50 rounded-2xl flex items-center justify-center mx-auto mb-3">
                   <Plus size={24} className="text-gray-300" />
                 </div>
-                <p className="text-gray-500 font-medium mb-1">No content yet</p>
-                <p className="text-gray-400 text-sm mb-4">Add videos or smart tips for Week {activeWeek}</p>
+                <p className="text-gray-500 font-medium mb-1">אין תוכן עדיין</p>
+                <p className="text-gray-400 text-sm mb-4">הוסף סרטונים או טיפים לשבוע {activeWeek}</p>
                 <button onClick={() => setModal({ week: activeWeek })}
                   className="text-[#00969E] text-sm font-semibold hover:underline">
-                  + Add first item
+                  + הוסף פריט ראשון
                 </button>
               </div>
             ) : (

@@ -12,7 +12,7 @@ const SIGNUP_TIME_KEY = 'upwell_signup_time'
 const steps = [
   {
     id: 'add_client',
-    video: '/onboarding/onboard_add_client.mp4',
+    video: 'https://res.cloudinary.com/dalsmzqmp/video/upload/v1781087887/onboard_add_client_dbfs2k.mp4',
     nav: '/clients/new',
     he: {
       title: 'שלב 1 — הוסף לקוח ראשון',
@@ -28,51 +28,34 @@ const steps = [
     },
   },
   {
-    id: 'create_program',
-    video: '/onboarding/onboard_create_program.mp4',
+    id: 'create_and_assign',
+    video: 'https://res.cloudinary.com/dalsmzqmp/video/upload/v1781087889/onboard_create_program_ydmyx1.mp4',
     nav: '/programs/new',
     he: {
-      title: 'שלב 2 — צור תוכנית אימון',
-      text: 'לחץ על "תוכניות" → "תוכנית חדשה" → הגדר שם, סוג ומשך → שמור.',
-      cta: 'יצרתי תוכנית ✓',
-      navBtn: 'פתח יצירת תוכנית',
+      title: 'שלב 2 — צור תוכנית ושייך ללקוח',
+      text: 'לחץ על "תוכניות" → "תוכנית חדשה" → שמור. אחר כך פתח לקוח → "שייך תוכנית" → בחר → אשר.',
+      cta: 'יצרתי ושייכתי ✓',
+      navBtn: 'פתח תוכניות',
     },
     en: {
-      title: 'Step 2 — Create a Training Program',
-      text: 'Click "Programs" → "New Program" → set name, type and duration → Save.',
-      cta: 'I created a program ✓',
-      navBtn: 'Open Create Program',
-    },
-  },
-  {
-    id: 'assign_program',
-    video: '/onboarding/onboard_assign_program.mp4',
-    nav: '/clients',
-    he: {
-      title: 'שלב 3 — שייך תוכנית ללקוח',
-      text: 'פתח לקוח → לחץ "שייך תוכנית" → בחר תוכנית → אשר.',
-      cta: 'שוניתי תוכנית ✓',
-      navBtn: 'פתח רשימת לקוחות',
-    },
-    en: {
-      title: 'Step 3 — Assign Program to Client',
-      text: 'Open a client → click "Assign Program" → pick a program → confirm.',
-      cta: 'I assigned a program ✓',
-      navBtn: 'Open Clients',
+      title: 'Step 2 — Create & Assign a Program',
+      text: 'Click "Programs" → "New Program" → Save. Then open a client → "Assign Program" → pick it → confirm.',
+      cta: 'Created & assigned ✓',
+      navBtn: 'Open Programs',
     },
   },
   {
     id: 'calendar',
-    video: '/onboarding/onboard_calendar.mp4',
+    video: 'https://res.cloudinary.com/dalsmzqmp/video/upload/v1781087886/onboard_calendar_n2kh87.mp4',
     nav: '/calendar',
     he: {
-      title: 'שלב 4 — קבע אימון ביומן',
+      title: 'שלב 3 — קבע אימון ביומן',
       text: 'לחץ על "יומן" → "אימון חדש" → בחר לקוח ותאריך → שמור.',
       cta: 'קבעתי אימון ✓',
       navBtn: 'פתח יומן',
     },
     en: {
-      title: 'Step 4 — Schedule a Session',
+      title: 'Step 3 — Schedule a Session',
       text: 'Click "Calendar" → "New Session" → pick a client and date → Save.',
       cta: 'I scheduled a session ✓',
       navBtn: 'Open Calendar',
@@ -80,16 +63,16 @@ const steps = [
   },
   {
     id: 'client_app',
-    video: '/onboarding/onboard_client_app.mp4',
+    video: 'https://res.cloudinary.com/dalsmzqmp/video/upload/v1781087885/onboard_client_app_svhuri.mp4',
     nav: '/clients',
     he: {
-      title: 'שלב 5 — שלח ללקוח את הגישה שלו',
+      title: 'שלב 4 — שלח ללקוח את הגישה שלו',
       text: 'פתח את פרטי הלקוח → העתק את הקישור האישי → שלח ב-WhatsApp.',
       cta: 'שלחתי את הקישור ✓',
       navBtn: 'פתח לקוחות',
     },
     en: {
-      title: 'Step 5 — Share Client App Link',
+      title: 'Step 4 — Share Client App Link',
       text: "Open a client's details → copy their personal link → send via WhatsApp.",
       cta: 'I sent the link ✓',
       navBtn: 'Open Clients',

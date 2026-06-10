@@ -22,13 +22,13 @@ export default function AssignProgram() {
   const filtered = clients.filter(c => c.name.toLowerCase().includes(search.toLowerCase()))
 
   const assign = async () => {
-    if (!selected) return setError('Please select a client')
+    if (!selected) return setError('נא לבחור לקוח')
     setLoading(true); setError('')
     try {
       await api.post('/client-programs', { clientId: selected, programId: id, startDate })
       navigate(`/programs/${id}`)
     } catch (e) {
-      setError(e.response?.data?.message || 'Failed to assign program')
+      setError(e.response?.data?.message || 'שגיאה בשיוך התוכנית')
     } finally { setLoading(false) }
   }
 
@@ -41,7 +41,7 @@ export default function AssignProgram() {
           <ArrowLeft size={16} className="text-gray-600" />
         </Link>
         <div>
-          <h2 className="font-bold text-gray-900">Assign Program</h2>
+          <h2 className="font-bold text-gray-900">שייך תוכנית</h2>
           {program && <p className="text-xs text-gray-400 mt-0.5">{program.title}</p>}
         </div>
       </div>
@@ -56,7 +56,7 @@ export default function AssignProgram() {
               </div>
               <div>
                 <p className="font-bold">{program.title}</p>
-                <p className="text-white/70 text-sm capitalize">{program.type} · {program.duration} weeks · {program.level}</p>
+                <p className="text-white/70 text-sm capitalize">{program.type} · {program.duration} שבועות · {program.level}</p>
               </div>
             </div>
           </div>
@@ -64,12 +64,12 @@ export default function AssignProgram() {
 
         {/* Client selector */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-          <h3 className="font-semibold text-gray-900 mb-4">Select Client</h3>
+          <h3 className="font-semibold text-gray-900 mb-4">בחר לקוח</h3>
           {error && <p className="text-red-500 text-sm bg-red-50 px-3 py-2 rounded-lg mb-3">{error}</p>}
 
           <div className="relative mb-3">
             <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search clients..."
+            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="חיפוש לקוחות..."
               className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#00969E]/20 focus:border-[#00969E]" />
           </div>
 
@@ -84,13 +84,13 @@ export default function AssignProgram() {
                 {selected === c._id && <CheckCircle size={16} className="text-[#00969E]" />}
               </button>
             ))}
-            {filtered.length === 0 && <p className="text-center text-sm text-gray-400 py-6">No clients found</p>}
+            {filtered.length === 0 && <p className="text-center text-sm text-gray-400 py-6">לא נמצאו לקוחות</p>}
           </div>
         </div>
 
         {/* Start date */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-          <h3 className="font-semibold text-gray-900 mb-3">Start Date</h3>
+          <h3 className="font-semibold text-gray-900 mb-3">תאריך התחלה</h3>
           <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)}
             className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#00969E]/20 focus:border-[#00969E] focus:bg-white transition-all" />
         </div>
@@ -101,12 +101,12 @@ export default function AssignProgram() {
             className="flex-1 py-3 bg-[#00969E] hover:bg-[#007A81] text-white rounded-xl text-sm font-semibold transition-all shadow-lg shadow-[#00969E]/20 disabled:opacity-50">
             {loading ? (
               <span className="flex items-center justify-center gap-2">
-                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Assigning...
+                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />משייך...
               </span>
-            ) : selectedClient ? `Assign to ${selectedClient.name}` : 'Select a client first'}
+            ) : selectedClient ? `שייך ל${selectedClient.name}` : 'בחר לקוח תחילה'}
           </button>
           <Link to={`/programs/${id}`} className="px-5 py-3 bg-white border border-gray-200 text-gray-600 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors shadow-sm">
-            Cancel
+            ביטול
           </Link>
         </div>
       </div>

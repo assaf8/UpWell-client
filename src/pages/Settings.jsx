@@ -258,6 +258,29 @@ function IntegrationsTab() {
         )}
       </div>
 
+      {/* SMS / WhatsApp reminders */}
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 rounded-xl bg-green-50 text-green-600 flex items-center justify-center">
+            <Phone size={20} />
+          </div>
+          <div>
+            <h3 className="font-semibold text-gray-900">תזכורות SMS / WhatsApp</h3>
+            <p className="text-xs text-gray-400">שלח תזכורות אוטומטיות ללקוחות לפני אימון</p>
+          </div>
+          <div className="mr-auto">
+            {status.twilio?.configured
+              ? <span className="flex items-center gap-1.5 text-xs font-semibold text-green-600 bg-green-50 px-3 py-1.5 rounded-full"><CheckCircle size={12} /> מוגדר</span>
+              : <span className="text-xs text-gray-400 bg-gray-50 px-3 py-1.5 rounded-full">לא מוגדר</span>}
+          </div>
+        </div>
+        {!status.twilio?.configured && (
+          <p className="text-xs text-amber-600 bg-amber-50 px-3 py-2 rounded-lg">
+            ⚠️ Twilio לא מוגדר — הוסף TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN ו-TWILIO_PHONE_NUMBER בשרת כדי לאפשר שליחת SMS/WhatsApp
+          </p>
+        )}
+      </div>
+
       {/* Email notifications */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
         <div className="flex items-center gap-3 mb-4">
