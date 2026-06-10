@@ -12,8 +12,8 @@ import OnboardingBot from './OnboardingBot'
 const nav = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'לוח בקרה' },
   { to: '/clients',   icon: Users,            label: 'לקוחות' },
-  { to: '/leads',     icon: Target,           label: 'לידים' },
   { to: '/groups',    icon: Users,            label: 'קבוצות' },
+  { to: '/leads',     icon: Target,           label: 'לידים' },
   { to: '/programs',  icon: Dumbbell,         label: 'תוכניות' },
   { to: '/calendar',  icon: Calendar,         label: 'יומן' },
   { to: '/social',    icon: Share2,           label: 'רשתות חברתיות' },
