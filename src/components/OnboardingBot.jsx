@@ -233,7 +233,7 @@ export default function OnboardingBot() {
       {!open && !localStorage.getItem(STORAGE_KEY) && (
         <button
           onClick={() => setOpen(true)}
-          className="fixed bottom-6 left-6 z-50 w-14 h-14 bg-[#00969E] rounded-full shadow-2xl flex items-center justify-center text-white hover:bg-[#007A81] transition-colors"
+          className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-[#00969E] rounded-full shadow-2xl flex items-center justify-center text-white hover:bg-[#007A81] transition-colors"
           title={lang === 'he' ? 'פתח מדריך התחלה' : 'Open setup guide'}
         >
           <MessageCircle size={22} />
@@ -242,7 +242,7 @@ export default function OnboardingBot() {
       )}
 
       {open && (
-        <div className="fixed bottom-6 left-6 z-50 w-[360px] bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden flex flex-col"
+        <div className="fixed bottom-6 right-6 z-50 w-[360px] bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden flex flex-col"
           dir={isRTL ? 'rtl' : 'ltr'}>
 
           {/* Header */}
