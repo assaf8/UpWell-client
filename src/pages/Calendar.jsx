@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Plus, ChevronRight, ChevronLeft, X, Clock, User, Bell, CheckCircle, Trash2, Hourglass, XCircle, MessageSquare } from 'lucide-react'
+import { Plus, ChevronRight, ChevronLeft, X, Clock, User, Bell, CheckCircle, Trash2, Hourglass, XCircle, MessageSquare, Users, RefreshCw } from 'lucide-react'
 import { useSearchParams } from 'react-router-dom'
 import api from '../lib/api'
 
@@ -86,25 +86,43 @@ function SessionDetailModal({ session, onClose, onDelete, onRemind }) {
   )
 }
 
+const FREQ_OPTIONS = [
+  { value: 'daily',    label: 'יומי' },
+  { value: 'weekly',   label: 'שבועי' },
+  { value: 'biweekly', label: 'דו-שבועי' },
+  { value: 'monthly',  label: 'חודשי' },
+]
+
 export default function Calendar() {
   const today = new Date()
   const [year, setYear] = useState(today.getFullYear())
   const [month, setMonth] = useState(today.getMonth())
   const [sessions, setSessions] = useState([])
+  const [groupSessions, setGroupSessions] = useState([])
   const [showModal, setShowModal] = useState(false)
+  const [sessionType, setSessionType] = useState('individual')
   const [selectedSession, setSelectedSession] = useState(null)
+  const [selectedGroupSession, setSelectedGroupSession] = useState(null)
   const [clients, setClients] = useState([])
+  const [groups, setGroups] = useState([])
   const [form, setForm] = useState({ clientId: '', date: '', time: '09:00', duration: 60, price: '' })
+  const [groupForm, setGroupForm] = useState({
+    groupId: '', title: '', date: '', time: '09:00', duration: 60,
+    maxParticipants: 10, location: '', notes: '',
+    isRecurring: false, frequency: 'weekly', recurringUntil: '',
+  })
   const [saving, setSaving] = useState(false)
   const [requests, setRequests] = useState([])
-  const [requestAction, setRequestAction] = useState(null) // { request, type: 'approve'|'decline' }
+  const [requestAction, setRequestAction] = useState(null)
   const [trainerNote, setTrainerNote] = useState('')
   const [actionForm, setActionForm] = useState({ time: '09:00', duration: 60, price: '' })
   const [actioning, setActioning] = useState(false)
 
   useEffect(() => {
     api.get(`/sessions?year=${year}&month=${month + 1}`).then(r => setSessions(r.data || [])).catch(() => {})
+    api.get(`/group-sessions?year=${year}&month=${month + 1}`).then(r => setGroupSessions(r.data || [])).catch(() => {})
     api.get('/clients').then(r => setClients(r.data.clients || [])).catch(() => {})
+    api.get('/groups').then(r => setGroups(r.data || [])).catch(() => {})
   }, [year, month])
 
   useEffect(() => {
@@ -123,7 +141,12 @@ export default function Calendar() {
   sessions.forEach(s => {
     const d = new Date(s.date).getDate()
     if (!sessionsByDay[d]) sessionsByDay[d] = []
-    sessionsByDay[d].push(s)
+    sessionsByDay[d].push({ ...s, _type: 'individual' })
+  })
+  groupSessions.forEach(s => {
+    const d = new Date(s.date).getDate()
+    if (!sessionsByDay[d]) sessionsByDay[d] = []
+    sessionsByDay[d].push({ ...s, _type: 'group' })
   })
 
   const save = async () => {
@@ -135,6 +158,38 @@ export default function Calendar() {
       setShowModal(false)
       setForm({ clientId: '', date: '', time: '09:00', duration: 60, price: '' })
     } catch {} finally { setSaving(false) }
+  }
+
+  const saveGroupSession = async () => {
+    if (!groupForm.groupId || !groupForm.title || !groupForm.date) return
+    setSaving(true)
+    try {
+      const res = await api.post('/group-sessions', {
+        groupId: groupForm.groupId,
+        title: groupForm.title,
+        date: groupForm.date,
+        time: groupForm.time,
+        duration: groupForm.duration,
+        maxParticipants: groupForm.maxParticipants,
+        location: groupForm.location,
+        notes: groupForm.notes,
+        isRecurring: groupForm.isRecurring,
+        frequency: groupForm.frequency,
+        recurringUntil: groupForm.isRecurring ? groupForm.recurringUntil : undefined,
+      })
+      // res.data is an array of created sessions
+      setGroupSessions(prev => [...prev, ...res.data])
+      setShowModal(false)
+      setGroupForm({ groupId: '', title: '', date: '', time: '09:00', duration: 60, maxParticipants: 10, location: '', notes: '', isRecurring: false, frequency: 'weekly', recurringUntil: '' })
+    } catch (e) {
+      alert(e.response?.data?.message || 'שגיאה בשמירה')
+    } finally { setSaving(false) }
+  }
+
+  const cancelGroupSession = async (id) => {
+    await api.delete(`/group-sessions/${id}`).catch(() => {})
+    setGroupSessions(prev => prev.filter(s => s._id !== id))
+    setSelectedGroupSession(null)
   }
 
   const deleteSession = async (id) => {
@@ -192,6 +247,37 @@ export default function Calendar() {
           onDelete={deleteSession}
           onRemind={sendReminder}
         />
+      )}
+
+      {selectedGroupSession && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl">
+            <div className="flex items-center justify-between p-5 border-b border-gray-100">
+              <h2 className="font-bold text-gray-900">אימון קבוצתי</h2>
+              <button onClick={() => setSelectedGroupSession(null)} className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center hover:bg-gray-200"><X size={15} /></button>
+            </div>
+            <div className="p-5 space-y-3">
+              <div className="bg-purple-50 rounded-xl p-4 space-y-2">
+                <p className="font-bold text-gray-900 text-base">{selectedGroupSession.title}</p>
+                <p className="text-sm text-purple-600 font-medium flex items-center gap-1.5"><Users size={13} /> {selectedGroupSession.group?.name}</p>
+                <p className="text-sm text-gray-500">📅 {new Date(selectedGroupSession.date).toLocaleDateString('he-IL', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
+                {selectedGroupSession.time && <p className="text-sm text-gray-500">🕐 {selectedGroupSession.time} · {selectedGroupSession.duration} דק׳</p>}
+                {selectedGroupSession.location && <p className="text-sm text-gray-500">📍 {selectedGroupSession.location}</p>}
+                {selectedGroupSession.isRecurring && <p className="text-sm text-gray-500 flex items-center gap-1.5"><RefreshCw size={12} /> אימון קבוע — {FREQ_OPTIONS.find(f => f.value === selectedGroupSession.frequency)?.label}</p>}
+              </div>
+              <div className="bg-gray-50 rounded-xl p-3">
+                <p className="text-xs font-semibold text-gray-600 mb-2">רשומים ({selectedGroupSession.registrations?.length || 0}/{selectedGroupSession.maxParticipants})</p>
+                {selectedGroupSession.registrations?.length > 0
+                  ? <div className="space-y-1">{selectedGroupSession.registrations.map(r => <p key={r._id} className="text-sm text-gray-700">{r.name}</p>)}</div>
+                  : <p className="text-sm text-gray-400">אין רשומים עדיין</p>}
+              </div>
+              <button onClick={() => cancelGroupSession(selectedGroupSession._id)}
+                className="w-full flex items-center justify-center gap-2 py-2.5 bg-red-50 text-red-500 rounded-xl text-sm font-semibold hover:bg-red-100 transition-colors">
+                <Trash2 size={14} /> בטל אימון זה
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Tab toggle */}
@@ -312,10 +398,10 @@ export default function Calendar() {
                 <div className="space-y-1">
                   {daySessions.slice(0, 2).map((s, i) => (
                     <div key={i}
-                      onClick={e => { e.stopPropagation(); setSelectedSession(s) }}
-                      className={`${sessionColors[i % sessionColors.length]} text-white text-xs rounded-lg px-1.5 py-0.5 truncate font-medium cursor-pointer hover:opacity-80 transition-opacity flex items-center gap-1`}>
-                      {s.reminderSent && <Bell size={8} className="flex-shrink-0" />}
-                      {s.time} {s.client?.name?.split(' ')[0]}
+                      onClick={e => { e.stopPropagation(); s._type === 'group' ? setSelectedGroupSession(s) : setSelectedSession(s) }}
+                      className={`${s._type === 'group' ? 'bg-purple-500' : sessionColors[i % sessionColors.length]} text-white text-xs rounded-lg px-1.5 py-0.5 truncate font-medium cursor-pointer hover:opacity-80 transition-opacity flex items-center gap-1`}>
+                      {s._type === 'group' ? <Users size={8} className="flex-shrink-0" /> : s.reminderSent ? <Bell size={8} className="flex-shrink-0" /> : null}
+                      {s.time} {s._type === 'group' ? s.title : s.client?.name?.split(' ')[0]}
                     </div>
                   ))}
                   {daySessions.length > 2 && <p className="text-xs text-gray-400 font-medium">+{daySessions.length - 2} עוד</p>}
@@ -401,59 +487,159 @@ export default function Calendar() {
 
       {showModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl">
+          <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl max-h-[92vh] flex flex-col">
             <div className="flex items-center justify-between p-5 border-b border-gray-100">
-              <h2 className="font-bold text-gray-900">תזמן אימון</h2>
+              <h2 className="font-bold text-gray-900">הוסף אימון</h2>
               <button onClick={() => setShowModal(false)} className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center hover:bg-gray-200"><X size={15} /></button>
             </div>
-            <div className="p-5 space-y-4">
-              <div>
-                <label className="block text-xs font-semibold text-gray-600 mb-1.5 flex items-center gap-1.5"><User size={11} /> לקוח</label>
-                <select value={form.clientId} onChange={e => setForm(f => ({...f, clientId: e.target.value}))}
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#00969E]/20 focus:border-[#00969E] bg-white">
-                  <option value="">בחר לקוח...</option>
-                  {clients.map(c => <option key={c._id} value={c._id}>{c.name}</option>)}
-                </select>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-semibold text-gray-600 mb-1.5">תאריך</label>
-                  <input type="date" value={form.date} onChange={e => setForm(f => ({...f, date: e.target.value}))} dir="ltr"
-                    className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#00969E]/20 focus:border-[#00969E]" />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-gray-600 mb-1.5 flex items-center gap-1"><Clock size={11} /> שעה</label>
-                  <input type="time" value={form.time} onChange={e => setForm(f => ({...f, time: e.target.value}))} dir="ltr"
-                    className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#00969E]/20 focus:border-[#00969E]" />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-semibold text-gray-600 mb-1.5">משך (דק׳)</label>
-                  <select value={form.duration} onChange={e => setForm(f => ({...f, duration: e.target.value}))}
-                    className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#00969E]/20 focus:border-[#00969E] bg-white">
-                    {[30,45,60,90,120].map(d => <option key={d} value={d}>{d} דק׳</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-gray-600 mb-1.5">מחיר (₪)</label>
-                  <input type="number" value={form.price} onChange={e => setForm(f => ({...f, price: e.target.value}))} placeholder="0" dir="ltr"
-                    className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#00969E]/20 focus:border-[#00969E]" />
-                </div>
+
+            {/* Type toggle */}
+            <div className="px-5 pt-4">
+              <div className="grid grid-cols-2 gap-2">
+                <button onClick={() => setSessionType('individual')}
+                  className={`flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold border-2 transition-all ${sessionType === 'individual' ? 'border-[#00969E] bg-[#E6F7F8] text-[#00969E]' : 'border-gray-100 text-gray-500 hover:border-gray-200'}`}>
+                  <User size={15} /> אימון יחידני
+                </button>
+                <button onClick={() => setSessionType('group')}
+                  className={`flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold border-2 transition-all ${sessionType === 'group' ? 'border-purple-500 bg-purple-50 text-purple-600' : 'border-gray-100 text-gray-500 hover:border-gray-200'}`}>
+                  <Users size={15} /> אימון קבוצתי
+                </button>
               </div>
             </div>
-            <div className="px-5 pb-1">
-              {(!form.clientId || !form.date) && (
-                <p className="text-xs text-red-500 text-right">
-                  {!form.clientId && !form.date ? 'נא לבחור לקוח ותאריך' : !form.clientId ? 'נא לבחור לקוח' : 'נא לבחור תאריך'}
-                </p>
+
+            <div className="p-5 space-y-4 overflow-y-auto flex-1">
+              {sessionType === 'individual' ? (
+                <>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-600 mb-1.5 flex items-center gap-1.5"><User size={11} /> לקוח</label>
+                    <select value={form.clientId} onChange={e => setForm(f => ({...f, clientId: e.target.value}))}
+                      className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#00969E]/20 focus:border-[#00969E] bg-white">
+                      <option value="">בחר לקוח...</option>
+                      {clients.map(c => <option key={c._id} value={c._id}>{c.name}</option>)}
+                    </select>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-600 mb-1.5">תאריך</label>
+                      <input type="date" value={form.date} onChange={e => setForm(f => ({...f, date: e.target.value}))} dir="ltr"
+                        className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#00969E]/20 focus:border-[#00969E]" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-600 mb-1.5 flex items-center gap-1"><Clock size={11} /> שעה</label>
+                      <input type="time" value={form.time} onChange={e => setForm(f => ({...f, time: e.target.value}))} dir="ltr"
+                        className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#00969E]/20 focus:border-[#00969E]" />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-600 mb-1.5">משך (דק׳)</label>
+                      <select value={form.duration} onChange={e => setForm(f => ({...f, duration: e.target.value}))}
+                        className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#00969E]/20 focus:border-[#00969E] bg-white">
+                        {[30,45,60,90,120].map(d => <option key={d} value={d}>{d} דק׳</option>)}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-600 mb-1.5">מחיר (₪)</label>
+                      <input type="number" value={form.price} onChange={e => setForm(f => ({...f, price: e.target.value}))} placeholder="0" dir="ltr"
+                        className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#00969E]/20 focus:border-[#00969E]" />
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-600 mb-1.5 flex items-center gap-1.5"><Users size={11} /> קבוצה</label>
+                    <select value={groupForm.groupId} onChange={e => setGroupForm(f => ({...f, groupId: e.target.value}))}
+                      className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-300/40 focus:border-purple-400 bg-white">
+                      <option value="">בחר קבוצה...</option>
+                      {groups.map(g => <option key={g._id} value={g._id}>{g.name} ({g.members?.length || 0} מתאמנים)</option>)}
+                    </select>
+                    {groups.length === 0 && <p className="text-xs text-gray-400 mt-1">אין קבוצות — <a href="/groups" className="text-[#00969E] underline">צור קבוצה קודם</a></p>}
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-600 mb-1.5">שם האימון *</label>
+                    <input value={groupForm.title} onChange={e => setGroupForm(f => ({...f, title: e.target.value}))} placeholder="למשל: אימון פונקציונלי שבועי"
+                      className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-300/40 focus:border-purple-400" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-600 mb-1.5">תאריך</label>
+                      <input type="date" value={groupForm.date} onChange={e => setGroupForm(f => ({...f, date: e.target.value}))} dir="ltr"
+                        className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-300/40 focus:border-purple-400" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-600 mb-1.5 flex items-center gap-1"><Clock size={11} /> שעה</label>
+                      <input type="time" value={groupForm.time} onChange={e => setGroupForm(f => ({...f, time: e.target.value}))} dir="ltr"
+                        className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-300/40 focus:border-purple-400" />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-600 mb-1.5">משך (דק׳)</label>
+                      <select value={groupForm.duration} onChange={e => setGroupForm(f => ({...f, duration: Number(e.target.value)}))}
+                        className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-300/40 focus:border-purple-400 bg-white">
+                        {[30,45,60,90,120].map(d => <option key={d} value={d}>{d} דק׳</option>)}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-600 mb-1.5">מקסימום משתתפים</label>
+                      <input type="number" min={1} value={groupForm.maxParticipants} onChange={e => setGroupForm(f => ({...f, maxParticipants: Number(e.target.value)}))} dir="ltr"
+                        className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-300/40 focus:border-purple-400" />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-600 mb-1.5">מיקום (אופציונלי)</label>
+                    <input value={groupForm.location} onChange={e => setGroupForm(f => ({...f, location: e.target.value}))} placeholder="למשל: אולם ספורט 2"
+                      className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-300/40 focus:border-purple-400" />
+                  </div>
+
+                  {/* Recurring toggle */}
+                  <div className="border border-gray-100 rounded-xl p-4 space-y-3">
+                    <label className="flex items-center gap-3 cursor-pointer">
+                      <div onClick={() => setGroupForm(f => ({...f, isRecurring: !f.isRecurring}))}
+                        className={`w-11 h-6 rounded-full transition-colors flex items-center px-0.5 ${groupForm.isRecurring ? 'bg-purple-500' : 'bg-gray-200'}`}>
+                        <div className={`w-5 h-5 rounded-full bg-white shadow transition-transform ${groupForm.isRecurring ? 'translate-x-5' : 'translate-x-0'}`} />
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-gray-800 flex items-center gap-1.5"><RefreshCw size={13} /> אימון קבוע</p>
+                        <p className="text-xs text-gray-400">יוצר מספר אימונים בלוח השנה</p>
+                      </div>
+                    </label>
+                    {groupForm.isRecurring && (
+                      <div className="grid grid-cols-2 gap-3 pt-1">
+                        <div>
+                          <label className="block text-xs font-semibold text-gray-600 mb-1.5">תדירות</label>
+                          <select value={groupForm.frequency} onChange={e => setGroupForm(f => ({...f, frequency: e.target.value}))}
+                            className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-300/40 focus:border-purple-400 bg-white">
+                            {FREQ_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-gray-600 mb-1.5">עד תאריך</label>
+                          <input type="date" value={groupForm.recurringUntil} onChange={e => setGroupForm(f => ({...f, recurringUntil: e.target.value}))} dir="ltr"
+                            className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-300/40 focus:border-purple-400" />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </>
               )}
             </div>
+
             <div className="flex gap-2 p-5 border-t border-gray-100">
-              <button onClick={save} disabled={saving || !form.clientId || !form.date}
-                className="flex-1 py-2.5 bg-[#00969E] hover:bg-[#007A81] text-white rounded-xl text-sm font-semibold transition-all shadow-lg shadow-[#00969E]/20 disabled:opacity-50 disabled:cursor-not-allowed">
-                {saving ? 'שומר...' : 'שמור אימון'}
-              </button>
+              {sessionType === 'individual' ? (
+                <>
+                  <button onClick={save} disabled={saving || !form.clientId || !form.date}
+                    className="flex-1 py-2.5 bg-[#00969E] hover:bg-[#007A81] text-white rounded-xl text-sm font-semibold transition-all shadow-lg shadow-[#00969E]/20 disabled:opacity-50 disabled:cursor-not-allowed">
+                    {saving ? 'שומר...' : 'שמור אימון'}
+                  </button>
+                </>
+              ) : (
+                <button onClick={saveGroupSession} disabled={saving || !groupForm.groupId || !groupForm.title || !groupForm.date || (groupForm.isRecurring && !groupForm.recurringUntil)}
+                  className="flex-1 py-2.5 bg-purple-500 hover:bg-purple-600 text-white rounded-xl text-sm font-semibold transition-all shadow-lg shadow-purple-500/20 disabled:opacity-50 disabled:cursor-not-allowed">
+                  {saving ? 'שומר...' : groupForm.isRecurring ? 'צור סדרת אימונים' : 'צור אימון קבוצתי'}
+                </button>
+              )}
               <button onClick={() => setShowModal(false)} className="px-5 py-2.5 bg-gray-100 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-200">ביטול</button>
             </div>
           </div>

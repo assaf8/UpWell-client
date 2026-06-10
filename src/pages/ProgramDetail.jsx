@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Plus, Edit, Video, Lightbulb, Upload, Trash2, Users, X, BarChart2, Dumbbell, Sparkles } from 'lucide-react'
 import api from '../lib/api'
 import { getMediaUrl } from '../lib/media'
@@ -206,10 +206,24 @@ function AddContentModal({ programId, week, onClose, onAdded }) {
 
 export default function ProgramDetail() {
   const { id } = useParams()
+  const navigate = useNavigate()
   const [program, setProgram] = useState(null)
   const [content, setContent] = useState([])
   const [modal, setModal] = useState(null)
   const [activeWeek, setActiveWeek] = useState(1)
+  const [deleting, setDeleting] = useState(false)
+
+  const deleteProgram = async () => {
+    if (!confirm('למחוק את התוכנית? פעולה זו אינה ניתנת לביטול.')) return
+    setDeleting(true)
+    try {
+      await api.delete(`/programs/${id}`)
+      navigate('/programs')
+    } catch {
+      alert('שגיאה במחיקה — נסה שוב')
+      setDeleting(false)
+    }
+  }
 
   useEffect(() => {
     api.get(`/programs/${id}`).then(r => { setProgram(r.data); setActiveWeek(1) }).catch(() => {})
@@ -249,12 +263,19 @@ export default function ProgramDetail() {
         <div className="flex gap-2">
           <Link to={`/programs/${id}/assign`}
             className="flex items-center gap-2 px-4 py-2 bg-[#00969E] hover:bg-[#007A81] text-white rounded-xl text-sm font-semibold shadow-lg shadow-[#00969E]/20 transition-all">
-            <Users size={14} /> Assign to Client
+            <Users size={14} /> שייך ללקוח
           </Link>
           <Link to={`/programs/${id}/edit`}
             className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-medium hover:bg-gray-50 shadow-sm">
-            <Edit size={14} /> Edit
+            <Edit size={14} /> עריכה
           </Link>
+          <button onClick={deleteProgram} disabled={deleting}
+            className="flex items-center gap-2 px-4 py-2 bg-red-50 border border-red-100 text-red-500 hover:bg-red-100 rounded-xl text-sm font-medium transition-all disabled:opacity-60">
+            {deleting
+              ? <span className="w-3.5 h-3.5 border-2 border-red-300 border-t-red-500 rounded-full animate-spin" />
+              : <Trash2 size={14} />}
+            מחק
+          </button>
         </div>
       </div>
 

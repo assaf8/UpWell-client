@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Plus, Dumbbell, Apple, HeartPulse, Users, Clock, Search } from 'lucide-react'
+import { Plus, Dumbbell, Apple, HeartPulse, Users, Clock, Search, Trash2 } from 'lucide-react'
 import api from '../lib/api'
 
 const typeConfig = {
@@ -16,11 +16,26 @@ export default function Programs() {
   const [filter, setFilter] = useState('all')
   const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(true)
+  const [deletingId, setDeletingId] = useState(null)
 
   useEffect(() => {
     setLoading(true)
     api.get('/programs').then(r => setPrograms(r.data || [])).finally(() => setLoading(false))
   }, [])
+
+  const deleteProgram = async (e, id) => {
+    e.preventDefault()
+    if (!confirm('למחוק את התוכנית? פעולה זו אינה ניתנת לביטול.')) return
+    setDeletingId(id)
+    try {
+      await api.delete(`/programs/${id}`)
+      setPrograms(prev => prev.filter(p => p._id !== id))
+    } catch {
+      alert('שגיאה במחיקה — נסה שוב')
+    } finally {
+      setDeletingId(null)
+    }
+  }
 
   const filtered = programs.filter(p => {
     const matchType = filter === 'all' || p.type === filter
@@ -80,8 +95,17 @@ export default function Programs() {
             const Icon = tc.icon
             return (
               <Link key={p._id} to={`/programs/${p._id}`}
-                className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all group overflow-hidden">
+                className="relative bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all group overflow-hidden">
                 <div className={`h-1.5 bg-gradient-to-r ${tc.gradient}`} />
+                <button
+                  onClick={(e) => deleteProgram(e, p._id)}
+                  disabled={deletingId === p._id}
+                  className="absolute top-4 left-4 opacity-0 group-hover:opacity-100 w-8 h-8 bg-red-50 hover:bg-red-100 rounded-lg flex items-center justify-center text-red-400 hover:text-red-600 transition-all z-10"
+                >
+                  {deletingId === p._id
+                    ? <span className="w-3.5 h-3.5 border-2 border-red-300 border-t-red-500 rounded-full animate-spin" />
+                    : <Trash2 size={14} />}
+                </button>
                 <div className="p-5">
                   <div className="flex items-start justify-between mb-4">
                     <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${tc.gradient} flex items-center justify-center shadow-md`}>

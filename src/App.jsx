@@ -27,11 +27,13 @@ import TraineePortal from './pages/trainee/TraineePortal'
 import TraineeProgramView from './pages/trainee/TraineeProgramView'
 import TraineeBookSession from './pages/trainee/TraineeBookSession'
 import TraineeChat from './pages/trainee/TraineeChat'
+import TraineeGroupSessions from './pages/trainee/TraineeGroupSessions'
 import TraineeFoodLog from './pages/trainee/TraineeFoodLog'
 import TraineeProgress from './pages/trainee/TraineeProgress'
 import Admin from './pages/Admin'
 import Billing from './pages/Billing'
 import Leads from './pages/Leads'
+import Groups from './pages/Groups'
 import InstallPrompt from './components/InstallPrompt'
 import AccessibilityWidget from './components/AccessibilityWidget'
 
@@ -100,6 +102,7 @@ export default function App() {
             <Route path="/programs/:id/assign"          element={<PrivateRoute><AssignProgram /></PrivateRoute>} />
             <Route path="/client-programs/:id"          element={<PrivateRoute><ClientProgramView /></PrivateRoute>} />
             <Route path="/leads"                        element={<PrivateRoute><Leads /></PrivateRoute>} />
+            <Route path="/groups"                       element={<PrivateRoute><Groups /></PrivateRoute>} />
             <Route path="/calendar"                     element={<PrivateRoute><Calendar /></PrivateRoute>} />
             <Route path="/social"                       element={<PrivateRoute><Social /></PrivateRoute>} />
             <Route path="/invoices"                     element={<PrivateRoute><Invoices /></PrivateRoute>} />
@@ -111,6 +114,7 @@ export default function App() {
             <Route path="/trainee/book"          element={<TraineeRoute><TraineeBookSession /></TraineeRoute>} />
             <Route path="/trainee/chat"          element={<TraineeRoute><TraineeChat /></TraineeRoute>} />
             <Route path="/trainee/food-log"      element={<TraineeRoute><TraineeFoodLog /></TraineeRoute>} />
+            <Route path="/trainee/groups"        element={<TraineeRoute><TraineeGroupSessions /></TraineeRoute>} />
             <Route path="/trainee/progress"      element={<TraineeRoute><TraineeProgress /></TraineeRoute>} />
 
             {/* Billing */}

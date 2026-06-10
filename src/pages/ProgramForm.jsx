@@ -1,7 +1,7 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate, useParams, Link } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, Video, Upload, X } from 'lucide-react'
 import api from '../lib/api'
 
 export default function ProgramForm() {
@@ -11,14 +11,44 @@ export default function ProgramForm() {
   const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm({
     defaultValues: { type: 'workout', duration: 4, level: 'beginner' }
   })
+  const [coverFile, setCoverFile] = useState(null)
+  const [coverPreview, setCoverPreview] = useState(null)
+  const [uploadingCover, setUploadingCover] = useState(false)
 
   useEffect(() => {
-    if (isEdit) api.get(`/programs/${id}`).then(r => reset(r.data)).catch(() => navigate('/programs'))
+    if (isEdit) api.get(`/programs/${id}`).then(r => {
+      reset(r.data)
+      if (r.data.coverVideo) setCoverPreview(r.data.coverVideo)
+    }).catch(() => navigate('/programs'))
   }, [id])
 
+  const handleCoverSelect = (e) => {
+    const f = e.target.files[0]
+    if (!f) return
+    setCoverFile(f)
+    setCoverPreview(URL.createObjectURL(f))
+  }
+
   const onSubmit = async (data) => {
-    if (isEdit) { await api.put(`/programs/${id}`, data); navigate(`/programs/${id}`) }
-    else { const res = await api.post('/programs', data); navigate(`/programs/${res.data._id}`) }
+    let coverVideoUrl = data.coverVideo || ''
+    if (coverFile) {
+      setUploadingCover(true)
+      try {
+        const form = new FormData()
+        form.append('coverVideo', coverFile)
+        const res = await api.post(`/programs/upload-cover`, form, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        })
+        coverVideoUrl = res.data.url
+      } catch {
+        // If upload fails, continue without cover video
+      } finally {
+        setUploadingCover(false)
+      }
+    }
+    const payload = { ...data, ...(coverVideoUrl ? { coverVideo: coverVideoUrl } : {}) }
+    if (isEdit) { await api.put(`/programs/${id}`, payload); navigate(`/programs/${id}`) }
+    else { const res = await api.post('/programs', payload); navigate(`/programs/${res.data._id}`) }
   }
 
   return (
@@ -74,10 +104,34 @@ export default function ProgramForm() {
               className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#00969E]/20 focus:border-[#00969E] focus:bg-white transition-all resize-none" />
           </div>
 
+          {/* Cover video */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
+              <Video size={15} className="text-gray-400" /> סרטון מבוא (אופציונלי)
+            </label>
+            {coverPreview ? (
+              <div className="relative rounded-xl overflow-hidden bg-black">
+                <video src={coverPreview} controls className="w-full max-h-48" />
+                <button type="button"
+                  onClick={() => { setCoverFile(null); setCoverPreview(null) }}
+                  className="absolute top-2 right-2 w-7 h-7 bg-black/60 rounded-full flex items-center justify-center text-white hover:bg-black/80">
+                  <X size={13} />
+                </button>
+              </div>
+            ) : (
+              <label className="flex flex-col items-center gap-2 p-6 border-2 border-dashed border-gray-200 hover:border-[#00969E] rounded-xl cursor-pointer transition-all">
+                <Upload size={20} className="text-gray-400" />
+                <span className="text-sm text-gray-500">לחץ להעלאת סרטון מבוא לתוכנית</span>
+                <span className="text-xs text-gray-400">MP4, MOV — יוצג ללקוח בראש התוכנית</span>
+                <input type="file" accept="video/*" className="hidden" onChange={handleCoverSelect} />
+              </label>
+            )}
+          </div>
+
           <div className="flex gap-3 pt-2">
-            <button type="submit" disabled={isSubmitting}
+            <button type="submit" disabled={isSubmitting || uploadingCover}
               className="px-6 py-2.5 bg-[#00969E] hover:bg-[#007A81] text-white rounded-xl text-sm font-semibold transition-all shadow-lg shadow-[#00969E]/20 disabled:opacity-60">
-              {isSubmitting ? 'שומר...' : isEdit ? 'שמור שינויים' : 'צור תוכנית'}
+              {uploadingCover ? 'מעלה סרטון...' : isSubmitting ? 'שומר...' : isEdit ? 'שמור שינויים' : 'צור תוכנית'}
             </button>
             <Link to="/programs" className="px-6 py-2.5 border border-gray-200 text-gray-600 rounded-xl text-sm font-medium hover:bg-gray-50">ביטול</Link>
           </div>
