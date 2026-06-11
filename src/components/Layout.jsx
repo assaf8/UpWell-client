@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext'
 import {
   LayoutDashboard, Users, Dumbbell, Calendar, Share2,
   FileText, Settings, LogOut, Menu, X, ChevronLeft, Bell, MessageCircle,
-  Target, AlertCircle, CreditCard
+  Target, AlertCircle, CreditCard, ArrowLeftRight
 } from 'lucide-react'
 import api from '../lib/api'
 import OnboardingBot from './OnboardingBot'
@@ -136,6 +136,11 @@ export default function Layout({ children }) {
               <p className="text-sm font-semibold text-white truncate">{user?.businessName || 'העסק שלי'}</p>
               <p className="text-xs text-white/35 truncate">{user?.email}</p>
             </div>
+            {user?.isAlsoTrainee && (
+              <button onClick={() => navigate('/trainee')} className="text-white/30 hover:text-[#00969E] transition-colors p-1" title="עבור לפורטל מתאמן">
+                <ArrowLeftRight size={15} />
+              </button>
+            )}
             <button onClick={handleLogout} className="text-white/30 hover:text-red-400 transition-colors p-1" title="התנתק">
               <LogOut size={15} />
             </button>

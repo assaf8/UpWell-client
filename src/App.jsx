@@ -55,7 +55,7 @@ function AdminRoute({ children }) {
 function TraineeRoute({ children }) {
   const { user } = useAuth()
   if (!user) return <Navigate to="/login" replace />
-  if (user.role !== 'trainee') return <Navigate to="/dashboard" replace />
+  if (user.role !== 'trainee' && !user.isAlsoTrainee) return <Navigate to="/dashboard" replace />
   return children
 }
 

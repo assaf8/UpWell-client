@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
-import { LogOut, Dumbbell, Apple, HeartPulse, ChevronLeft, TrendingUp, CheckCircle, Play, MessageCircle, Calendar, Clock } from 'lucide-react'
+import { LogOut, Dumbbell, Apple, HeartPulse, ChevronLeft, TrendingUp, CheckCircle, Play, MessageCircle, Calendar, Clock, ArrowLeftRight } from 'lucide-react'
 import api from '../../lib/api'
 import TraineeNav from './TraineeNav'
 
@@ -50,6 +50,15 @@ export default function TraineePortal() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Switch to trainer panel — only shown if dual-role */}
+      {user?.isAlsoTrainee && (
+        <div className="bg-[#0D1F3C] px-5 py-2 flex items-center justify-between" dir="rtl">
+          <span className="text-white/50 text-xs">מצב מתאמן</span>
+          <button onClick={() => navigate('/dashboard')} className="flex items-center gap-1.5 text-xs text-[#00969E] font-semibold">
+            <ArrowLeftRight size={12} /> עבור לפאנל המאמן
+          </button>
+        </div>
+      )}
       {/* Hero header */}
       <div className="relative overflow-hidden pb-24 pt-10 px-5" style={{background: 'linear-gradient(135deg, #00969E 0%, #007A81 60%, #005f66 100%)'}}>
         {/* Decorative circles */}
